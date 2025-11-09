@@ -107,7 +107,7 @@ const MyTransaction = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 p-4">
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-[1220px] mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>

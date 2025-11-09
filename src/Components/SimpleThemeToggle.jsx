@@ -6,16 +6,16 @@ const SimpleThemeToggle = () => {
 
   useEffect(() => {
     const theme = localStorage.getItem('theme');
-    if (theme === 'dark') {
-      setIsDark(true);
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.classList.add('dark');
-    } else {
+    if (theme === 'light') {
       setIsDark(false);
       document.documentElement.setAttribute('data-theme', 'light');
       document.documentElement.classList.remove('dark');
+    } else {
+      setIsDark(true);
+      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.classList.add('dark');
       if (!theme) {
-        localStorage.setItem('theme', 'light');
+        localStorage.setItem('theme', 'dark');
       }
     }
   }, []);

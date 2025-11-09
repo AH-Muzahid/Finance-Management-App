@@ -51,7 +51,7 @@ const Reports = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 p-4">
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-[1220px] mx-auto">
                 <div className="text-center mb-8">
                     <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                         <span className="text-white font-bold text-2xl">R</span>

@@ -6,7 +6,11 @@ export default {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      maxWidth: {
+        '1220': '1220px',
+      }
+    },
   },
   plugins: [
     require('daisyui'),

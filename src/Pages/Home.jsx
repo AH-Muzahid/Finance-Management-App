@@ -41,7 +41,7 @@ const Home = () => {
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-16">
             {/* Hero Section */}
             <div className="bg-linear-to-br from-orange-400 via-orange-500 to-red-500 dark:bg-linear-to-br dark:from-orange-600 dark:via-orange-700 dark:to-red-700 py-20">
-                <div className="max-w-6xl mx-auto px-6 text-center">
+                <div className="max-w-[1220px] mx-auto px-6 text-center">
                     <h1 className="text-5xl font-bold text-white mb-6">Take Control of Your Finances</h1>
                     <p className="text-xl text-orange-100 mb-8 max-w-2xl mx-auto">Track, manage, and grow your wealth with FinEase - your personal finance companion</p>
                     <Link to="/add-transaction" className="bg-white text-orange-600 px-8 py-3 rounded-lg font-semibold hover:bg-orange-50 transition-colors shadow-lg">
@@ -51,44 +51,83 @@ const Home = () => {
             </div>
 
             {/* Stats Section */}
-            <div className="bg-gray-50 dark:bg-base-100 py-16">
-                <div className="max-w-6xl mx-auto px-6">
-                <h2 className="text-3xl font-bold text-center text-base-content mb-12">Financial Overview</h2>
+            <div className="bg-gray-50 dark:bg-base-100 py-20">
+                <div className="max-w-[1220px] mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl font-bold text-base-content mb-4">Financial Overview</h2>
+                        <p className="text-xl text-base-content/70 max-w-2xl mx-auto">Get a comprehensive view of your financial health with real-time insights and analytics</p>
+                    </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300">
-                        <div className="w-16 h-16 bg-orange-100 dark:bg-base-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <FaDollarSign className="text-2xl text-orange-500" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white dark:text-base-content/70 mb-2">Total Income</h3>
-                        <p className="text-3xl font-bold text-orange-500">${totalIncome.toLocaleString()}</p>
-                    </div>
-                    
-                    <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300">
-                        <div className="w-16 h-16 bg-red-50 dark:bg-base-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <FaCreditCard className="text-2xl text-red-500" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white dark:text-base-content/70 mb-2">Total Expenses</h3>
-                        <p className="text-3xl font-bold text-red-500">${totalExpenses.toLocaleString()}</p>
-                    </div>
-                    
-                    <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300">
-                        <div className="w-16 h-16 bg-orange-50 dark:bg-base-300 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <FaChartLine className="text-2xl text-orange-500" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white dark:text-base-content/70 mb-2">Net Balance</h3>
-                        <p className={`text-3xl font-bold ${balance >= 0 ? 'text-orange-500' : 'text-red-500'}`}>
-                            ${balance.toLocaleString()}
-                        </p>
-                    </div>
-                </div>
-            </div>
+                    {/* Main Stats */}
 
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+{/* Additional Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
+                            <h4 className="text-sm font-medium text-base-content/70 mb-2">Transactions</h4>
+                            <p className="text-2xl font-bold text-base-content">{transactions.length}</p>
+                        </div>
+                        <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
+                            <h4 className="text-sm font-medium text-base-content/70 mb-2">Avg. Expense</h4>
+                            <p className="text-2xl font-bold text-base-content">
+                                ${transactions.filter(t => t.type === 'expense').length > 0 
+                                    ? Math.round(totalExpenses / transactions.filter(t => t.type === 'expense').length).toLocaleString() 
+                                    : '0'}
+                            </p>
+                        </div>
+                        <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
+                            <h4 className="text-sm font-medium text-base-content/70 mb-2">Savings Rate</h4>
+                            <p className="text-2xl font-bold text-base-content">
+                                {totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0}%
+                            </p>
+                        </div>
+                        <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
+                            <h4 className="text-sm font-medium text-base-content/70 mb-2">Categories</h4>
+                            <p className="text-2xl font-bold text-base-content">
+                                {[...new Set(transactions.map(t => t.category))].length}
+                            </p>
+                        </div>
+                    </div>
+
+                        <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
+                            <div className="w-20 h-20 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <FaDollarSign className="text-3xl text-green-600" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-base-content mb-2">Total Income</h3>
+                            <p className="text-4xl font-bold text-green-600 mb-2">${totalIncome.toLocaleString()}</p>
+                            <p className="text-sm text-base-content/60">This month</p>
+                        </div>
+                        
+                        <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
+                            <div className="w-20 h-20 bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900 dark:to-red-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <FaCreditCard className="text-3xl text-red-600" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-base-content mb-2">Total Expenses</h3>
+                            <p className="text-4xl font-bold text-red-600 mb-2">${totalExpenses.toLocaleString()}</p>
+                            <p className="text-sm text-base-content/60">This month</p>
+                        </div>
+                        
+                        <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
+                            <div className="w-20 h-20 bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <FaChartLine className="text-3xl text-orange-600" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-base-content mb-2">Net Balance</h3>
+                            <p className={`text-4xl font-bold mb-2 ${balance >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
+                                ${balance.toLocaleString()}
+                            </p>
+                            <p className={`text-sm ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                {balance >= 0 ? '↗ Positive' : '↘ Negative'} Balance
+                            </p>
+                        </div>
+                    </div>
+
+                    
+                </div>
             </div>
 
             {/* Tips Section */}
             <div className="bg-white dark:bg-base-200 py-16">
-                <div className="max-w-6xl mx-auto px-6">
+                <div className="max-w-[1220px] mx-auto px-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         {/* Budgeting Tips */}
                         <div className="bg-white dark:bg-base-100 rounded-xl p-8 shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300">
