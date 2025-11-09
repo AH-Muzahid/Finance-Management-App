@@ -1,21 +1,33 @@
 import React from 'react';
 import { Link } from 'react-router';
-import { FaHome, FaExclamationTriangle } from 'react-icons/fa';
+import { FaHome, FaSearch } from 'react-icons/fa';
 
 const NotFound = () => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center section-padding">
-            <div className="container-max text-center">
-                <div className="card-glass p-12 max-w-2xl mx-auto fade-in">
-                    <FaExclamationTriangle className="text-6xl text-yellow-500 mx-auto mb-6" />
-                    <h1 className="heading-primary text-white mb-4">404</h1>
-                    <h2 className="heading-secondary text-white mb-6">Page Not Found</h2>
-                    <p className="text-body text-gray-300 mb-8">
+        <div className="fixed inset-0 bg-gray-50 dark:bg-base-100 flex items-center justify-center p-4 z-50">
+            <div className="text-center max-w-md mx-auto">
+                <div className="bg-white dark:bg-base-200 rounded-2xl shadow-xl border border-gray-100 dark:border-base-300 p-8">
+                    <div className="w-20 h-20 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span className="text-white font-bold text-4xl">404</span>
+                    </div>
+                    <h1 className="text-3xl font-bold text-base-content mb-4">Page Not Found</h1>
+                    <p className="text-base-content/70 mb-8">
                         The page you're looking for doesn't exist or has been moved.
                     </p>
-                    <Link to="/" className="btn-primary inline-flex items-center gap-2">
-                        <FaHome /> Back to Home
-                    </Link>
+                    <div className="space-y-4">
+                        <Link 
+                            to="/" 
+                            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                        >
+                            <FaHome /> Back to Home
+                        </Link>
+                        <button 
+                            onClick={() => window.history.back()}
+                            className="w-full bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                        >
+                            <FaSearch /> Go Back
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

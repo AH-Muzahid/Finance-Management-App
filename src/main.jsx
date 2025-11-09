@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { RouterProvider } from "react-router";
 import { Toaster } from 'react-hot-toast';
-import { ThemeProvider } from './contexts/ThemeContext';
+
 import Root from './Layout/Root';
 import Profile from './Pages/Profile';
 import Home from './Pages/Home';
@@ -89,9 +89,7 @@ const router = createBrowserRouter([
 ])
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ThemeProvider>
-      <RouterProvider router={router} />
-      <Toaster position="top" />
-    </ThemeProvider>
+    <RouterProvider router={router} />
+    <Toaster position="top-center" />
   </StrictMode>
 )

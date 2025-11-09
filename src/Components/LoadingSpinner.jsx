@@ -9,15 +9,26 @@ const LoadingSpinner = ({ size = 'md', fullScreen = false }) => {
     };
 
     const spinner = (
-        <div className={`animate-spin rounded-full border-4 border-white/20 border-t-white ${sizeClasses[size]}`}></div>
+        <div className={`animate-spin rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-orange-500 ${sizeClasses[size]}`}></div>
     );
 
     if (fullScreen) {
         return (
-            <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center z-50">
+            <div className="fixed inset-0 bg-gradient-to-br from-orange-50 via-white to-red-50 dark:from-gray-900 dark:via-black dark:to-gray-800 flex items-center justify-center z-50">
                 <div className="text-center">
-                    <div className="w-16 h-16 animate-spin rounded-full border-4 border-white/20 border-t-white mx-auto mb-4"></div>
-                    <p className="text-white text-lg">Loading...</p>
+                    <div className="relative mb-8">
+                        <div className="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                            <span className="text-white font-bold text-3xl">F</span>
+                        </div>
+                        <div className="absolute inset-0 w-20 h-20 border-4 border-orange-300 rounded-full animate-ping mx-auto"></div>
+                    </div>
+                    <div className="flex justify-center space-x-1 mb-4">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
+                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
+                        <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                    </div>
+                    <p className="text-base-content text-xl font-semibold animate-pulse">Loading...</p>
+                    <p className="text-base-content/60 text-sm mt-2">Please wait while we prepare your dashboard</p>
                 </div>
             </div>
         );

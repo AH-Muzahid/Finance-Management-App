@@ -35,7 +35,7 @@ const Reports = () => {
         { month: 'Apr', income: 3500, expenses: 900 }
     ];
 
-    const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+    const COLORS = ['#f97316', '#10B981', '#EF4444', '#3B82F6', '#8B5CF6'];
 
     useEffect(() => {
         if (!authLoading) {
@@ -50,14 +50,20 @@ const Reports = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 section-padding">
-            <div className="container-max">
-                <h1 className="heading-primary text-white mb-12 text-center fade-in">Financial Reports</h1>
+        <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 p-4">
+            <div className="max-w-6xl mx-auto">
+                <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-white font-bold text-2xl">R</span>
+                    </div>
+                    <h1 className="text-3xl font-bold text-base-content mb-2">Financial Reports</h1>
+                    <p className="text-base-content/70">Analyze your financial data</p>
+                </div>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 content-spacing">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Expense Categories */}
-                    <div className="card-glass p-6 card-equal hover-glow slide-up">
-                        <h3 className="heading-tertiary text-white mb-6">Expenses by Category</h3>
+                    <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 p-6">
+                        <h3 className="text-lg font-semibold text-base-content mb-6">Expenses by Category</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
@@ -66,46 +72,114 @@ const Reports = () => {
                                     cy="50%"
                                     labelLine={false}
                                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                    outerRadius={80}
+                                    outerRadius={100}
+                                    innerRadius={40}
                                     fill="#8884d8"
                                     dataKey="value"
+                                    stroke="#ffffff"
+                                    strokeWidth={2}
                                 >
                                     {pieData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip />
+                                <Tooltip 
+                                    contentStyle={{
+                                        backgroundColor: '#f97316',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: 'white'
+                                    }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
 
                     {/* Monthly Trends */}
-                    <div className="card-glass p-6 card-equal hover-glow slide-up">
-                        <h3 className="heading-tertiary text-white mb-6">Monthly Trends</h3>
+                    <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 p-6">
+                        <h3 className="text-lg font-semibold text-base-content mb-6">Monthly Trends</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <LineChart data={monthlyData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="month" />
-                                <YAxis />
-                                <Tooltip />
-                                <Line type="monotone" dataKey="income" stroke="#10B981" strokeWidth={2} />
-                                <Line type="monotone" dataKey="expenses" stroke="#EF4444" strokeWidth={2} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                <XAxis 
+                                    dataKey="month" 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                                />
+                                <YAxis 
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                                />
+                                <Tooltip 
+                                    contentStyle={{
+                                        backgroundColor: '#f97316',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        color: 'white'
+                                    }}
+                                />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="income" 
+                                    stroke="#10B981" 
+                                    strokeWidth={3}
+                                    dot={{ fill: '#10B981', strokeWidth: 2, r: 6 }}
+                                    activeDot={{ r: 8, fill: '#10B981' }}
+                                />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="expenses" 
+                                    stroke="#EF4444" 
+                                    strokeWidth={3}
+                                    dot={{ fill: '#EF4444', strokeWidth: 2, r: 6 }}
+                                    activeDot={{ r: 8, fill: '#EF4444' }}
+                                />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
                 {/* Income vs Expenses Bar Chart */}
-                <div className="card-glass p-6 hover-glow slide-up">
-                    <h3 className="heading-tertiary text-white mb-6">Income vs Expenses Comparison</h3>
+                <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 p-6">
+                    <h3 className="text-lg font-semibold text-base-content mb-6">Income vs Expenses Comparison</h3>
                     <ResponsiveContainer width="100%" height={400}>
-                        <BarChart data={monthlyData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="month" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar dataKey="income" fill="#10B981" />
-                            <Bar dataKey="expenses" fill="#EF4444" />
+                        <BarChart data={monthlyData} barCategoryGap={20}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                            <XAxis 
+                                dataKey="month" 
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#6b7280', fontSize: 12 }}
+                            />
+                            <YAxis 
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fill: '#6b7280', fontSize: 12 }}
+                            />
+                            <Tooltip 
+                                contentStyle={{
+                                    backgroundColor: '#f97316',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    color: 'white'
+                                }}
+                            />
+                            <Bar 
+                                dataKey="income" 
+                                fill="#10B981" 
+                                radius={[4, 4, 0, 0]}
+                                stroke="#ffffff"
+                                strokeWidth={1}
+                            />
+                            <Bar 
+                                dataKey="expenses" 
+                                fill="#EF4444" 
+                                radius={[4, 4, 0, 0]}
+                                stroke="#ffffff"
+                                strokeWidth={1}
+                            />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

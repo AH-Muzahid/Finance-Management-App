@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../Firebase/firebase.init';
-import { useTheme } from '../contexts/ThemeContext';
+
 import { FaEye, FaEyeSlash, FaGoogle, FaEnvelope, FaLock, FaRocket } from 'react-icons/fa';
 
 const provider = new GoogleAuthProvider();
@@ -10,7 +10,7 @@ const provider = new GoogleAuthProvider();
 const LogIn = () => {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const { isDark } = useTheme();
+
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
@@ -65,68 +65,49 @@ const LogIn = () => {
     };
 
     return (
-        <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
-            isDark 
-                ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
-                : 'bg-gradient-to-br from-blue-50 to-indigo-100'
-        }`}>
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-base-100 pt-20">
             <div className="w-full max-w-md">
-                <div className={`rounded-2xl shadow-xl p-8 transition-colors duration-300 ${
-                    isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
-                }`}>
-                    <div className="text-center mb-8 fade-in">
-                        <h1 className={`heading-secondary mb-4 ${
-                            isDark ? 'text-white' : 'text-gray-800'
-                        }`}>
+                <div className="bg-white dark:bg-base-200 rounded-2xl shadow-xl border border-gray-100 dark:border-base-300 p-8">
+                    <div className="text-center mb-8">
+                        <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-white font-bold text-2xl">F</span>
+                        </div>
+                        <h1 className="text-2xl md:text-3xl font-bold text-base-content mb-4">
                             Welcome Back!
                         </h1>
-                        <p className={`text-body ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Sign in to manage your finances</p>
+                        <p className="text-base-content/70">Sign in to manage your finances</p>
                     </div>
                     
-                    <form onSubmit={handleLogin} className="content-spacing slide-up">
-                        <div className="form-control">
+                    <form onSubmit={handleLogin} className="space-y-6">
+                        <div>
                             <div className="mb-2">
-                                <span className={`font-medium flex items-center gap-2 ${
-                                    isDark ? 'text-gray-300' : 'text-gray-700'
-                                }`}><FaEnvelope className="text-blue-600" /> Email</span>
+                                <span className="font-medium flex items-center gap-2 text-base-content"><FaEnvelope className="text-orange-500" /> Email</span>
                             </div>
                             <input 
                                 type="email" 
                                 name="email" 
-                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-                                    isDark 
-                                        ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' 
-                                        : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
-                                }`} 
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all" 
                                 placeholder="Enter your email" 
                                 required 
                             />
                         </div>
                         
-                        <div className="form-control">
+                        <div>
                             <div className="mb-2">
-                                <span className={`font-medium flex items-center gap-2 ${
-                                    isDark ? 'text-gray-300' : 'text-gray-700'
-                                }`}><FaLock className="text-blue-600" /> Password</span>
+                                <span className="font-medium flex items-center gap-2 text-base-content"><FaLock className="text-orange-500" /> Password</span>
                             </div>
                             <div className="relative">
                                 <input 
                                     type={showPassword ? "text" : "password"}
                                     name="password" 
-                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-12 ${
-                                        isDark 
-                                            ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' 
-                                            : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
-                                    }`} 
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all pr-12" 
                                     placeholder="Enter your password" 
                                     required 
                                 />
                                 <button 
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
-                                        isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'
-                                    }`}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                                 >
                                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                                 </button>
@@ -138,7 +119,7 @@ const LogIn = () => {
                                         const email = document.querySelector('input[name="email"]').value;
                                         navigate('/forgot-password', { state: { email } });
                                     }}
-                                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                    className="text-orange-500 hover:text-orange-600 text-sm font-medium text-center"
                                 >
                                     Forgot password?
                                 </button>
@@ -146,43 +127,33 @@ const LogIn = () => {
                         </div>
                         
                         {error && (
-                            <div className={`border rounded-lg p-4 ${
-                                isDark 
-                                    ? 'bg-red-900/20 border-red-800 text-red-400' 
-                                    : 'bg-red-50 border-red-200 text-red-600'
-                            }`}>
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg p-4">
                                 <span className="font-medium">{error}</span>
                             </div>
                         )}
                         
-                        <button className="w-full btn-primary flex items-center justify-center gap-2">
+                        <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
                             <FaRocket/> Sign In
                         </button>
                     </form>
                     
                     <div className="flex items-center my-6">
-                        <div className="flex-1 h-px bg-gray-300"></div>
-                        <span className="px-4 text-gray-500 font-medium text-sm">OR</span>
-                        <div className="flex-1 h-px bg-gray-300"></div>
+                        <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        <span className="px-4 text-base-content/60 font-medium text-sm">OR</span>
+                        <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
                     
                     <button 
                         onClick={handleGoogleLogin}
-                        className={`w-full border font-semibold py-3 px-6 rounded-lg transition-all duration-200 mb-6 flex items-center justify-center gap-3 ${
-                            isDark 
-                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-white' 
-                                : 'bg-white border-gray-300 hover:bg-gray-50 text-gray-700'
-                        }`}
+                        className="w-full bg-orange-400 hover:bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
                     >
                         <FaGoogle className="text-red-500" />
                         Continue with Google
                     </button>
                     
-                    <p className={`text-center text-sm ${
-                        isDark ? 'text-gray-300' : 'text-gray-600'
-                    }`}>
+                    <p className="text-center text-sm text-base-content/70">
                         New to Finance Management? 
-                        <Link to='/register' className='text-blue-600 hover:text-blue-800 font-semibold ml-1 transition-colors'>
+                        <Link to='/register' className='text-orange-500 hover:text-orange-600 font-semibold ml-1 transition-colors'>
                             Create Account
                         </Link>
                     </p>

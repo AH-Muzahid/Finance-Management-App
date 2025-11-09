@@ -106,129 +106,129 @@ const MyTransaction = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 section-padding">
-            <div className="container-max">
+        <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 p-4">
+            <div className="max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
-                    <div className="fade-in">
-                        <h1 className="heading-primary text-white mb-2">My Transactions</h1>
-                        <p className="text-body text-gray-300">Manage your financial transactions</p>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-base-content mb-2">My Transactions</h1>
+                        <p className="text-base-content/70">Manage your financial transactions</p>
                     </div>
                     <Link 
                         to="/add-transaction"
-                        className="btn-primary"
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
                     >
                         + Add Transaction
                     </Link>
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid-responsive mb-12 slide-up">
-                    <div className="bg-success-gradient rounded-xl p-6 text-white text-center card-equal hover-glow">
-                        <h3 className="heading-tertiary mb-3">Total Income</h3>
-                        <p className="text-3xl font-bold">${totalIncome.toLocaleString()}</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
+                        <h3 className="text-lg font-semibold text-base-content mb-3">Total Income</h3>
+                        <p className="text-3xl font-bold text-green-600">${totalIncome.toLocaleString()}</p>
                     </div>
-                    <div className="bg-danger-gradient rounded-xl p-6 text-white text-center card-equal hover-glow">
-                        <h3 className="heading-tertiary mb-3">Total Expenses</h3>
-                        <p className="text-3xl font-bold">${totalExpenses.toLocaleString()}</p>
+                    <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
+                        <h3 className="text-lg font-semibold text-base-content mb-3">Total Expenses</h3>
+                        <p className="text-3xl font-bold text-red-600">${totalExpenses.toLocaleString()}</p>
                     </div>
-                    <div className="bg-primary-gradient rounded-xl p-6 text-white text-center card-equal hover-glow">
-                        <h3 className="heading-tertiary mb-3">Net Balance</h3>
-                        <p className="text-3xl font-bold">${balance.toLocaleString()}</p>
+                    <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
+                        <h3 className="text-lg font-semibold text-base-content mb-3">Net Balance</h3>
+                        <p className={`text-3xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>${balance.toLocaleString()}</p>
                     </div>
                 </div>
 
                 {/* Filters and Search */}
-                <div className="card-glass p-6 mb-8 slide-up">
+                <div className="bg-white dark:bg-base-200 rounded-xl p-6 mb-8 shadow-lg border border-gray-100 dark:border-base-300">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Search */}
                         <div>
-                            <label className="form-label">Search</label>
+                            <label className="block text-sm font-medium text-base-content mb-2">Search</label>
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Search transactions..."
-                                className="form-input"
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
                             />
                         </div>
 
                         {/* Filter by Type */}
                         <div>
-                            <label className="form-label">Filter by Type</label>
+                            <label className="block text-sm font-medium text-base-content mb-2">Filter by Type</label>
                             <select
                                 value={filter}
                                 onChange={(e) => setFilter(e.target.value)}
-                                className="form-select"
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
                             >
-                                <option value="all" className="bg-gray-800">All Transactions</option>
-                                <option value="income" className="bg-gray-800">Income Only</option>
-                                <option value="expense" className="bg-gray-800">Expenses Only</option>
+                                <option value="all">All Transactions</option>
+                                <option value="income">Income Only</option>
+                                <option value="expense">Expenses Only</option>
                             </select>
                         </div>
 
                         {/* Sort by */}
                         <div>
-                            <label className="form-label">Sort by</label>
+                            <label className="block text-sm font-medium text-base-content mb-2">Sort by</label>
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="form-select"
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
                             >
-                                <option value="date" className="bg-gray-800">Date (Newest First)</option>
-                                <option value="amount" className="bg-gray-800">Amount (Highest First)</option>
-                                <option value="category" className="bg-gray-800">Category (A-Z)</option>
+                                <option value="date">Date (Newest First)</option>
+                                <option value="amount">Amount (Highest First)</option>
+                                <option value="category">Category (A-Z)</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
                 {/* Transactions List */}
-                <div className="card-glass overflow-hidden slide-up">
+                <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 overflow-hidden">
                     <div className="p-6">
-                        <h3 className="heading-tertiary text-white mb-4">
+                        <h3 className="text-xl font-semibold text-base-content mb-4">
                             Transactions ({filteredTransactions.length})
                         </h3>
                     </div>
                     
                     {filteredTransactions.length === 0 ? (
-                        <div className="p-8 text-center content-spacing">
-                            <p className="text-body text-gray-400">No transactions found</p>
+                        <div className="p-8 text-center">
+                            <p className="text-base-content/70 mb-4">No transactions found</p>
                             <Link 
                                 to="/add-transaction"
-                                className="btn-primary inline-block"
+                                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors inline-block"
                             >
                                 Add Your First Transaction
                             </Link>
                         </div>
                     ) : (
-                        <div className="divide-y divide-white/10">
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
                             {filteredTransactions.map(transaction => (
-                                <div key={transaction.id} className="p-6 hover:bg-white/5 transition-all duration-300 hover-lift">
+                                <div key={transaction.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                         <div className="flex-1">
                                             <div className="flex flex-wrap items-center gap-3 mb-3">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                                     transaction.type === 'income' 
-                                                        ? 'bg-green-500/20 text-green-400' 
-                                                        : 'bg-red-500/20 text-red-400'
+                                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                                                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                                                 }`}>
                                                     {transaction.type.toUpperCase()}
                                                 </span>
-                                                <span className="text-gray-400 text-sm">{transaction.category}</span>
+                                                <span className="text-base-content/70 text-sm">{transaction.category}</span>
                                             </div>
-                                            <h4 className="text-white font-semibold text-lg mb-1">{transaction.description}</h4>
-                                            <p className="text-small text-gray-400">{transaction.date}</p>
+                                            <h4 className="text-base-content font-semibold text-lg mb-1">{transaction.description}</h4>
+                                            <p className="text-sm text-base-content/70">{transaction.date}</p>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <span className={`text-2xl font-bold ${
-                                                transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
+                                                transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                                             }`}>
                                                 {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()}
                                             </span>
                                             <button
                                                 onClick={() => handleDeleteTransaction(transaction.id)}
-                                                className="text-red-400 hover:text-red-300 p-2 hover:bg-red-500/20 rounded-lg transition-all duration-300 hover-lift"
+                                                className="text-red-500 hover:text-red-600 p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded-lg transition-colors"
                                                 title="Delete transaction"
                                             >
                                                 ×

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../Firebase/firebase.init';
-import { FaEnvelope } from 'react-icons/fa';
+import { FaEnvelope, FaArrowLeft } from 'react-icons/fa';
 
 const ForgotPassword = () => {
     const [message, setMessage] = useState('');
@@ -12,7 +12,7 @@ const ForgotPassword = () => {
     const location = useLocation();
 
     useEffect(() => {
-        document.title = 'Reset Password - Game Hub';
+        document.title = 'Reset Password - Finance Management';
         // Auto-fill email from login page
         if (location.state?.email) {
             setEmail(location.state.email);
@@ -55,65 +55,60 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-
-            <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-20 left-10 w-32 h-32 bg-cyan-400 rounded-full blur-xl"></div>
-                <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-500 rounded-full blur-xl"></div>
-            </div>
-            <div className="absolute inset-0 opacity-5" style={{
-                backgroundImage: 'linear-gradient(cyan 1px, transparent 1px), linear-gradient(90deg, cyan 1px, transparent 1px)',
-                backgroundSize: '50px 50px'
-            }}></div>
-            <div className="hero-content flex-col lg:flex-col mx-auto  px-4 justify-center items-center min-h-screen relative z-10">
-                <div className="relative z-10 container mx-auto px-4">
-                    <div className="max-w-lg mx-auto">
-                        <div className="text-center mb-8">
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black bg-linear-to-r from-cyan-400 via-pink-500 to-yellow-400 bg-clip-text text-transparent mb-4 transition-all duration-1000 ease-out hover:scale-105">Reset Password</h1>
-                            <p className="text-cyan-300 text-lg font-medium">Enter your email address and we'll send you a link to reset your password.</p>
-                            <div className="w-32 h-1 bg-linear-to-r from-cyan-400 to-pink-500 mx-auto rounded-full m-4"></div>
-
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-base-100 pt-20">
+            <div className="w-full max-w-md">
+                <div className="bg-white dark:bg-base-200 rounded-2xl shadow-xl border border-gray-100 dark:border-base-300 p-8">
+                    <div className="text-center mb-8">
+                        <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FaEnvelope className="text-white text-xl" />
                         </div>
-                        <div className="bg-black/40 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-8 shadow-2xl transition-all duration-700 ease-out hover:bg-black/50 hover:border-cyan-400/50 hover:shadow-cyan-400/20 hover:-translate-y-2">
-                            <form onSubmit={handleResetPassword}>
-
-
-                                <div className="form-control">
-                                    <div className="mb-2">
-                                        <span className="text-cyan-300 font-bold flex items-center gap-2"><FaEnvelope /> Email</span>
-                                    </div>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        className="input input-bordered w-full bg-black/50 border-cyan-400/50 text-white placeholder-gray-400 focus:border-cyan-400 focus:bg-black/70 transition-all duration-300"
-                                        placeholder="Enter your email"
-                                        required
-                                    />
-                                </div>
-
-                                <div className="mt-4">
-                                    {message && <div className="alert alert-success"><span>{message}</span></div>}
-                                    {error && <div className="alert alert-error"><span>{error}</span></div>}
-                                </div>
-
-                                <div className="form-control mt-6">
-                                    <button
-
-                                        className={`w-full bg-linear-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-xl transition-all duration-500 ease-out transform hover:-translate-y-1 hover:shadow-2xl hover:shadow-pink-500/40 mb-5 text-sm sm:text-base active:scale-95  flex items-center justify-center gap-3 mx-auto ${loading ? 'loading' : ''}`}
-                                        disabled={loading}
-                                    >
-                                        {loading ? 'Sending...' : 'Reset Password'}
-                                    </button>
-                                </div>
-                            </form>
-                        <p className="text-center text-gray-300 text-sm sm:text-base">
-                            <Link to='/login' className='text-yellow-400 hover:text-yellow-300 font-bold ml-1 transition-colors'>Back to Sign In</Link>
-                        </p>
-                        </div>
-
+                        <h1 className="text-2xl md:text-3xl font-bold text-base-content mb-4">
+                            Reset Password
+                        </h1>
+                        <p className="text-base-content/70">Enter your email address and we'll send you a link to reset your password.</p>
                     </div>
+                    
+                    <form onSubmit={handleResetPassword} className="space-y-6">
+                        <div>
+                            <div className="mb-2">
+                                <span className="font-medium flex items-center gap-2 text-base-content"><FaEnvelope className="text-orange-500" /> Email</span>
+                            </div>
+                            <input
+                                type="email"
+                                name="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
+                                placeholder="Enter your email"
+                                required
+                            />
+                        </div>
+
+                        {message && (
+                            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 rounded-lg p-4">
+                                <span className="font-medium">{message}</span>
+                            </div>
+                        )}
+                        
+                        {error && (
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg p-4">
+                                <span className="font-medium">{error}</span>
+                            </div>
+                        )}
+
+                        <button
+                            className={`w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={loading}
+                        >
+                            <FaEnvelope /> {loading ? 'Sending...' : 'Send Reset Link'}
+                        </button>
+                    </form>
+                    
+                    <p className="text-center text-sm text-base-content/70 mt-6">
+                        <Link to='/login' className='text-orange-500 hover:text-orange-600 font-semibold transition-colors flex items-center justify-center gap-2'>
+                            <FaArrowLeft /> Back to Sign In
+                        </Link>
+                    </p>
                 </div>
             </div>
         </div>
