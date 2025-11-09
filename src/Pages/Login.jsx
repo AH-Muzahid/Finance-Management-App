@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../Firebase/firebase.init';
+import { useTheme } from '../contexts/ThemeContext';
 import { FaEye, FaEyeSlash, FaGoogle, FaEnvelope, FaLock, FaRocket } from 'react-icons/fa';
 
 const provider = new GoogleAuthProvider();
@@ -9,11 +10,10 @@ const provider = new GoogleAuthProvider();
 const LogIn = () => {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const { isDark } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
-    
-    // Add  forgot password button
 
     useEffect(() => {
         document.title = 'Sign In - Finance Management';
@@ -26,8 +26,6 @@ const LogIn = () => {
         }
     }, [error]);
 
-    
-
     const handleLogin = (event) => {
         event.preventDefault();
         setError('');
@@ -38,7 +36,6 @@ const LogIn = () => {
 
         signInWithEmailAndPassword(auth, email, password)
             .then(result => {
-                
                 form.reset();
                 navigate(from, { replace: true });
             })
@@ -68,38 +65,39 @@ const LogIn = () => {
     };
 
     return (
-        <div className="min-h-screen bg-linear-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden flex items-center justify-center">
-             {/* Urban Background Elements  */}
-            <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-20 left-10 w-32 h-32 bg-cyan-400 rounded-full blur-xl"></div>
-                <div className="absolute bottom-20 right-10 w-40 h-40 bg-pink-500 rounded-full blur-xl"></div>
-                <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-yellow-400 rounded-full blur-lg"></div>
-            </div>
-            
-            {/* Grid Pattern */}
-            <div className="absolute inset-0 opacity-5" style={{
-                backgroundImage: 'linear-gradient(cyan 1px, transparent 1px), linear-gradient(90deg, cyan 1px, transparent 1px)',
-                backgroundSize: '50px 50px'
-            }}></div>
-
-            <div className="relative z-10 w-full max-w-md mx-auto px-4 transition-all duration-700 ease-out">
-                <div className="bg-black/40 backdrop-blur-xl border border-cyan-400/30 rounded-3xl p-8 shadow-2xl transition-all duration-700 ease-out hover:bg-black/50 hover:border-cyan-400/50 hover:shadow-cyan-400/20 hover:-translate-y-2">
+        <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+            isDark 
+                ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
+                : 'bg-gradient-to-br from-blue-50 to-indigo-100'
+        }`}>
+            <div className="w-full max-w-md">
+                <div className={`rounded-2xl shadow-xl p-8 transition-colors duration-300 ${
+                    isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
+                }`}>
                     <div className="text-center mb-8">
-                        <h1 className="text-3xl lg:text-4xl font-black bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 bg-clip-text text-transparent mb-4 transition-all duration-1000 ease-out hover:scale-105">
-                            WELCOME BACK!
+                        <h1 className={`text-3xl font-bold mb-2 ${
+                            isDark ? 'text-white' : 'text-gray-800'
+                        }`}>
+                            Welcome Back!
                         </h1>
-                        <p className="text-cyan-300 text-sm sm:text-base lg:text-lg font-medium transition-all duration-500 hover:text-cyan-200">Manage your finances smartly</p>
-                        <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-pink-500 mx-auto rounded-full mt-4"></div>
+                        <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>Sign in to manage your finances</p>
                     </div>
+                    
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div className="form-control">
                             <div className="mb-2">
-                                <span className="text-cyan-300 font-bold flex items-center gap-2"><FaEnvelope /> Email</span>
+                                <span className={`font-medium flex items-center gap-2 ${
+                                    isDark ? 'text-gray-300' : 'text-gray-700'
+                                }`}><FaEnvelope className="text-blue-600" /> Email</span>
                             </div>
                             <input 
                                 type="email" 
                                 name="email" 
-                                className="input input-bordered w-full bg-black/50 border-cyan-400/50 text-white placeholder-gray-400 focus:border-cyan-400 focus:bg-black/70 focus:shadow-lg focus:shadow-cyan-400/25 transition-all duration-500 ease-out hover:border-cyan-300 hover:bg-black/60" 
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                                    isDark 
+                                        ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' 
+                                        : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
+                                }`} 
                                 placeholder="Enter your email" 
                                 required 
                             />
@@ -107,66 +105,84 @@ const LogIn = () => {
                         
                         <div className="form-control">
                             <div className="mb-2">
-                                <span className="text-cyan-300 font-bold flex items-center gap-2"><FaLock /> Password</span>
+                                <span className={`font-medium flex items-center gap-2 ${
+                                    isDark ? 'text-gray-300' : 'text-gray-700'
+                                }`}><FaLock className="text-blue-600" /> Password</span>
                             </div>
                             <div className="relative">
                                 <input 
                                     type={showPassword ? "text" : "password"}
                                     name="password" 
-                                    className="input input-bordered w-full bg-black/50 border-cyan-400/50 text-white placeholder-gray-400 focus:border-cyan-400 focus:bg-black/70 focus:shadow-lg focus:shadow-cyan-400/25 transition-all duration-500 ease-out hover:border-cyan-300 hover:bg-black/60 pr-12" 
+                                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all pr-12 ${
+                                        isDark 
+                                            ? 'border-gray-600 bg-gray-700 text-white placeholder-gray-400' 
+                                            : 'border-gray-300 bg-white text-gray-900 placeholder-gray-500'
+                                    }`} 
                                     placeholder="Enter your password" 
                                     required 
                                 />
                                 <button 
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-11 top-1/2 transform -translate-y-1/2 text-cyan-400 hover:text-cyan-300 transition-all duration-300 ease-out hover:scale-125 hover:rotate-12"
+                                    className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
+                                        isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'
+                                    }`}
                                 >
                                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                                 </button>
                             </div>
-                            <label className="label">
+                            <div className="text-right mt-2">
                                 <button 
                                     type="button"
                                     onClick={() => {
                                         const email = document.querySelector('input[name="email"]').value;
                                         navigate('/forgot-password', { state: { email } });
                                     }}
-                                    className="text-pink-400 hover:text-pink-300 transition-colors font-medium"
+                                    className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                                 >
                                     Forgot password?
                                 </button>
-                            </label>
+                            </div>
                         </div>
                         
                         {error && (
-                            <div className="bg-red-500/20 border border-red-500/50 rounded-xl p-4">
-                                <span className="text-red-300 font-medium">{error}</span>
+                            <div className={`border rounded-lg p-4 ${
+                                isDark 
+                                    ? 'bg-red-900/20 border-red-800 text-red-400' 
+                                    : 'bg-red-50 border-red-200 text-red-600'
+                            }`}>
+                                <span className="font-medium">{error}</span>
                             </div>
                         )}
                         
-                        <button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-500 ease-out transform hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/40 text-sm sm:text-base active:scale-95 flex items-center justify-center gap-3">
-                            <FaRocket/> SIGN IN
+                        <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
+                            <FaRocket/> Sign In
                         </button>
                     </form>
                     
                     <div className="flex items-center my-6">
-                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
-                        <span className="px-4 text-cyan-300 font-bold text-sm sm:text-base">OR</span>
-                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent"></div>
+                        <div className="flex-1 h-px bg-gray-300"></div>
+                        <span className="px-4 text-gray-500 font-medium text-sm">OR</span>
+                        <div className="flex-1 h-px bg-gray-300"></div>
                     </div>
                     
                     <button 
                         onClick={handleGoogleLogin}
-                        className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-500 ease-out transform hover:scale-105 hover:shadow-2xl hover:shadow-pink-500/40 mb-6 text-sm sm:text-base active:scale-95 flex items-center justify-center gap-3"
+                        className={`w-full border font-semibold py-3 px-6 rounded-lg transition-all duration-200 mb-6 flex items-center justify-center gap-3 ${
+                            isDark 
+                                ? 'bg-gray-700 border-gray-600 hover:bg-gray-600 text-white' 
+                                : 'bg-white border-gray-300 hover:bg-gray-50 text-gray-700'
+                        }`}
                     >
-                        <FaGoogle />
+                        <FaGoogle className="text-red-500" />
                         Continue with Google
                     </button>
                     
-                    <p className="text-center text-gray-300 text-sm sm:text-base">
+                    <p className={`text-center text-sm ${
+                        isDark ? 'text-gray-300' : 'text-gray-600'
+                    }`}>
                         New to Finance Management? 
-                        <Link to='/register' className='text-yellow-400 hover:text-yellow-300 font-bold ml-1 transition-colors'>
+                        <Link to='/register' className='text-blue-600 hover:text-blue-800 font-semibold ml-1 transition-colors'>
                             Create Account
                         </Link>
                     </p>
