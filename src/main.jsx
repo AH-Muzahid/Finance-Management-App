@@ -4,13 +4,18 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { RouterProvider } from "react-router";
+import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Root from './Layout/Root';
-import Profile from './Components/Profile';
+import Profile from './Pages/Profile';
 import Home from './Pages/Home';
-import Login from './Components/Login';
-import Regestration from './Components/Regestration';
+import Login from './Pages/Login';
+import Registration from './Pages/Regestration';
 import ForgetPass from './Components/ForgetPass';
 import UpdateProfile from './Components/UpdateProfile';
+import AddTransaction from './Pages/AddTransaction';
+import MyTransaction from './Pages/MyTransaction';
+import Reports from './Pages/Reports';
 import PrivateRoute from './Components/PrivateRoute';
 
 const router = createBrowserRouter([
@@ -28,7 +33,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/register",
-        Component: Regestration,
+        Component: Registration,
       },
       {
         path: "/forgot-password",
@@ -50,11 +55,38 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
+      {
+        path: "/add-transaction",
+        element: (
+          <PrivateRoute>
+            <AddTransaction />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/transactions",
+        element: (
+          <PrivateRoute>
+            <MyTransaction />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/reports",
+        element: (
+          <PrivateRoute>
+            <Reports />
+          </PrivateRoute>
+        ),
+      },
 
     ]}
 ])
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" />
+    </ThemeProvider>
   </StrictMode>
 )
