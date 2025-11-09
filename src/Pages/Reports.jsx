@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
+import LoadingSpinner from '../Components/LoadingSpinner';
 
 const Reports = () => {
-    const [user] = useAuthState(auth);
+    const [user, authLoading] = useAuthState(auth);
+    const [dataLoading, setDataLoading] = useState(true);
     const [transactions] = useState([
         { id: 1, type: 'expense', category: 'Food & Dining', amount: 250, date: '2024-01-15' },
         { id: 2, type: 'income', category: 'Salary', amount: 3000, date: '2024-01-01' },
@@ -35,15 +37,27 @@ const Reports = () => {
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
+    useEffect(() => {
+        if (!authLoading) {
+            setTimeout(() => {
+                setDataLoading(false);
+            }, 800);
+        }
+    }, [authLoading]);
+
+    if (authLoading || dataLoading) {
+        return <LoadingSpinner fullScreen />;
+    }
+
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-            <div className="max-w-7xl mx-auto">
-                <h1 className="text-3xl font-bold text-white mb-8">Financial Reports</h1>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 section-padding">
+            <div className="container-max">
+                <h1 className="heading-primary text-white mb-12 text-center fade-in">Financial Reports</h1>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12 content-spacing">
                     {/* Expense Categories */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6">
-                        <h3 className="text-xl font-bold text-white mb-4">Expenses by Category</h3>
+                    <div className="card-glass p-6 card-equal hover-glow slide-up">
+                        <h3 className="heading-tertiary text-white mb-6">Expenses by Category</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie
@@ -66,8 +80,8 @@ const Reports = () => {
                     </div>
 
                     {/* Monthly Trends */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6">
-                        <h3 className="text-xl font-bold text-white mb-4">Monthly Trends</h3>
+                    <div className="card-glass p-6 card-equal hover-glow slide-up">
+                        <h3 className="heading-tertiary text-white mb-6">Monthly Trends</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <LineChart data={monthlyData}>
                                 <CartesianGrid strokeDasharray="3 3" />
@@ -82,8 +96,8 @@ const Reports = () => {
                 </div>
 
                 {/* Income vs Expenses Bar Chart */}
-                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6">
-                    <h3 className="text-xl font-bold text-white mb-4">Income vs Expenses Comparison</h3>
+                <div className="card-glass p-6 hover-glow slide-up">
+                    <h3 className="heading-tertiary text-white mb-6">Income vs Expenses Comparison</h3>
                     <ResponsiveContainer width="100%" height={400}>
                         <BarChart data={monthlyData}>
                             <CartesianGrid strokeDasharray="3 3" />

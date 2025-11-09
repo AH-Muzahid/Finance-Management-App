@@ -74,16 +74,16 @@ const LogIn = () => {
                 <div className={`rounded-2xl shadow-xl p-8 transition-colors duration-300 ${
                     isDark ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'
                 }`}>
-                    <div className="text-center mb-8">
-                        <h1 className={`text-3xl font-bold mb-2 ${
+                    <div className="text-center mb-8 fade-in">
+                        <h1 className={`heading-secondary mb-4 ${
                             isDark ? 'text-white' : 'text-gray-800'
                         }`}>
                             Welcome Back!
                         </h1>
-                        <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>Sign in to manage your finances</p>
+                        <p className={`text-body ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Sign in to manage your finances</p>
                     </div>
                     
-                    <form onSubmit={handleLogin} className="space-y-6">
+                    <form onSubmit={handleLogin} className="content-spacing slide-up">
                         <div className="form-control">
                             <div className="mb-2">
                                 <span className={`font-medium flex items-center gap-2 ${
@@ -155,7 +155,7 @@ const LogIn = () => {
                             </div>
                         )}
                         
-                        <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
+                        <button className="w-full btn-primary flex items-center justify-center gap-2">
                             <FaRocket/> Sign In
                         </button>
                     </form>

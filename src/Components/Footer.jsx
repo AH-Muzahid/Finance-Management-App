@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { useTheme } from '../contexts/ThemeContext';
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaLinkedin, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
 const Footer = () => {
     const { isDark } = useTheme();
@@ -12,16 +13,12 @@ const Footer = () => {
                 ? 'bg-gradient-to-r from-gray-900 to-gray-800 text-white' 
                 : 'bg-gradient-to-r from-slate-900 to-purple-900 text-white'
         }`}>
-            <div className="max-w-7xl mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="container-max section-padding">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 content-spacing-lg">
                     {/* Logo & Description */}
                     <div className="col-span-1 md:col-span-2">
-                        <div className="flex items-center space-x-2 mb-4">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                isDark 
-                                    ? 'bg-gradient-to-r from-blue-500 to-purple-600' 
-                                    : 'bg-gradient-to-r from-cyan-400 to-blue-500'
-                            }`}>
+                        <div className="navbar-logo mb-4">
+                            <div className="navbar-logo-icon">
                                 <span className="text-white font-bold text-xl">F</span>
                             </div>
                             <span className="text-2xl font-bold">FinEase</span>
@@ -32,28 +29,28 @@ const Footer = () => {
                             Your trusted personal finance management platform. Take control of your finances with ease and confidence.
                         </p>
                         <div className="flex space-x-4">
-                            <a href="#" className={`transition-colors ${
+                            <a href="#" className={`transition-colors hover-lift ${
                                 isDark 
                                     ? 'text-gray-500 hover:text-blue-400' 
                                     : 'text-gray-400 hover:text-cyan-400'
                             }`}>
                                 <FaFacebook size={20} />
                             </a>
-                            <a href="#" className={`transition-colors ${
+                            <a href="#" className={`transition-colors hover-lift ${
                                 isDark 
                                     ? 'text-gray-500 hover:text-blue-400' 
                                     : 'text-gray-400 hover:text-cyan-400'
                             }`}>
-                                <FaTwitter size={20} />
+                                <FaXTwitter size={20} />
                             </a>
-                            <a href="#" className={`transition-colors ${
+                            <a href="#" className={`transition-colors hover-lift ${
                                 isDark 
                                     ? 'text-gray-500 hover:text-blue-400' 
                                     : 'text-gray-400 hover:text-cyan-400'
                             }`}>
                                 <FaInstagram size={20} />
                             </a>
-                            <a href="#" className={`transition-colors ${
+                            <a href="#" className={`transition-colors hover-lift ${
                                 isDark 
                                     ? 'text-gray-500 hover:text-blue-400' 
                                     : 'text-gray-400 hover:text-cyan-400'

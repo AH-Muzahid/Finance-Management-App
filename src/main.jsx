@@ -16,6 +16,7 @@ import UpdateProfile from './Components/UpdateProfile';
 import AddTransaction from './Pages/AddTransaction';
 import MyTransaction from './Pages/MyTransaction';
 import Reports from './Pages/Reports';
+import NotFound from './Pages/NotFound';
 import PrivateRoute from './Components/PrivateRoute';
 
 const router = createBrowserRouter([
@@ -79,14 +80,18 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-
-    ]}
+      {
+        path: "*",
+        Component: NotFound,
+      },
+    ]
+  }
 ])
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
       <RouterProvider router={router} />
-      <Toaster position="top-right" />
+      <Toaster position="top" />
     </ThemeProvider>
   </StrictMode>
 )

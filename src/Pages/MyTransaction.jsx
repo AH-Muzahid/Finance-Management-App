@@ -3,11 +3,13 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
 import { Link } from 'react-router';
 import toast from 'react-hot-toast';
+import LoadingSpinner from '../Components/LoadingSpinner';
 
 const MyTransaction = () => {
-    const [user] = useAuthState(auth);
+    const [user, authLoading] = useAuthState(auth);
     const [transactions, setTransactions] = useState([]);
     const [filteredTransactions, setFilteredTransactions] = useState([]);
+    const [dataLoading, setDataLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [sortBy, setSortBy] = useState('date');
     const [searchTerm, setSearchTerm] = useState('');
@@ -25,9 +27,14 @@ const MyTransaction = () => {
     ];
 
     useEffect(() => {
-        setTransactions(mockTransactions);
-        setFilteredTransactions(mockTransactions);
-    }, []);
+        if (!authLoading) {
+            setTimeout(() => {
+                setTransactions(mockTransactions);
+                setFilteredTransactions(mockTransactions);
+                setDataLoading(false);
+            }, 600);
+        }
+    }, [authLoading]);
 
     useEffect(() => {
         let filtered = transactions;
@@ -63,71 +70,96 @@ const MyTransaction = () => {
     }, [transactions, filter, sortBy, searchTerm]);
 
     const handleDeleteTransaction = (id) => {
-        if (window.confirm('Are you sure you want to delete this transaction?')) {
-            setTransactions(prev => prev.filter(t => t.id !== id));
-            toast.success('Transaction deleted successfully!');
-        }
+        toast((t) => (
+            <div className="flex flex-col gap-3">
+                <p className="font-medium">Delete this transaction?</p>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            setTransactions(prev => prev.filter(t => t.id !== id));
+                            toast.success('Transaction deleted successfully!');
+                            toast.dismiss(t.id);
+                        }}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
+                    >
+                        Delete
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(t.id)}
+                        className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        ), {
+            duration: 10000,
+        });
     };
 
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     const balance = totalIncome - totalExpenses;
 
+    if (authLoading || dataLoading) {
+        return <LoadingSpinner fullScreen />;
+    }
+
     return (
-        <div className="min-h-screen bg-linear-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
-            <div className="max-w-6xl mx-auto">
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 section-padding">
+            <div className="container-max">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">My Transactions</h1>
-                        <p className="text-gray-300">Manage your financial transactions</p>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
+                    <div className="fade-in">
+                        <h1 className="heading-primary text-white mb-2">My Transactions</h1>
+                        <p className="text-body text-gray-300">Manage your financial transactions</p>
                     </div>
                     <Link 
                         to="/add-transaction"
-                        className="bg-linear-to-r from-cyan-500 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-cyan-600 hover:to-blue-700 transition-all transform hover:scale-105"
+                        className="btn-primary"
                     >
                         + Add Transaction
                     </Link>
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-linear-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
-                        <h3 className="text-lg font-semibold mb-2">Total Income</h3>
-                        <p className="text-2xl font-bold">${totalIncome.toLocaleString()}</p>
+                <div className="grid-responsive mb-12 slide-up">
+                    <div className="bg-success-gradient rounded-xl p-6 text-white text-center card-equal hover-glow">
+                        <h3 className="heading-tertiary mb-3">Total Income</h3>
+                        <p className="text-3xl font-bold">${totalIncome.toLocaleString()}</p>
                     </div>
-                    <div className="bg-linear-to-r from-red-500 to-red-600 rounded-xl p-6 text-white">
-                        <h3 className="text-lg font-semibold mb-2">Total Expenses</h3>
-                        <p className="text-2xl font-bold">${totalExpenses.toLocaleString()}</p>
+                    <div className="bg-danger-gradient rounded-xl p-6 text-white text-center card-equal hover-glow">
+                        <h3 className="heading-tertiary mb-3">Total Expenses</h3>
+                        <p className="text-3xl font-bold">${totalExpenses.toLocaleString()}</p>
                     </div>
-                    <div className="bg-linear-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-                        <h3 className="text-lg font-semibold mb-2">Net Balance</h3>
-                        <p className="text-2xl font-bold">${balance.toLocaleString()}</p>
+                    <div className="bg-primary-gradient rounded-xl p-6 text-white text-center card-equal hover-glow">
+                        <h3 className="heading-tertiary mb-3">Net Balance</h3>
+                        <p className="text-3xl font-bold">${balance.toLocaleString()}</p>
                     </div>
                 </div>
 
                 {/* Filters and Search */}
-                <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 mb-8">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="card-glass p-6 mb-8 slide-up">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Search */}
                         <div>
-                            <label className="block text-white font-semibold mb-2">Search</label>
+                            <label className="form-label">Search</label>
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Search transactions..."
-                                className="w-full px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                                className="form-input"
                             />
                         </div>
 
                         {/* Filter by Type */}
                         <div>
-                            <label className="block text-white font-semibold mb-2">Filter by Type</label>
+                            <label className="form-label">Filter by Type</label>
                             <select
                                 value={filter}
                                 onChange={(e) => setFilter(e.target.value)}
-                                className="w-full px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                                className="form-select"
                             >
                                 <option value="all" className="bg-gray-800">All Transactions</option>
                                 <option value="income" className="bg-gray-800">Income Only</option>
@@ -137,11 +169,11 @@ const MyTransaction = () => {
 
                         {/* Sort by */}
                         <div>
-                            <label className="block text-white font-semibold mb-2">Sort by</label>
+                            <label className="form-label">Sort by</label>
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="w-full px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                                className="form-select"
                             >
                                 <option value="date" className="bg-gray-800">Date (Newest First)</option>
                                 <option value="amount" className="bg-gray-800">Amount (Highest First)</option>
@@ -152,19 +184,19 @@ const MyTransaction = () => {
                 </div>
 
                 {/* Transactions List */}
-                <div className="bg-white/10 backdrop-blur-lg rounded-xl overflow-hidden">
+                <div className="card-glass overflow-hidden slide-up">
                     <div className="p-6">
-                        <h3 className="text-xl font-bold text-white mb-4">
+                        <h3 className="heading-tertiary text-white mb-4">
                             Transactions ({filteredTransactions.length})
                         </h3>
                     </div>
                     
                     {filteredTransactions.length === 0 ? (
-                        <div className="p-8 text-center">
-                            <p className="text-gray-400 text-lg">No transactions found</p>
+                        <div className="p-8 text-center content-spacing">
+                            <p className="text-body text-gray-400">No transactions found</p>
                             <Link 
                                 to="/add-transaction"
-                                className="inline-block mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-cyan-600 hover:to-blue-700 transition-all"
+                                className="btn-primary inline-block"
                             >
                                 Add Your First Transaction
                             </Link>
@@ -172,10 +204,10 @@ const MyTransaction = () => {
                     ) : (
                         <div className="divide-y divide-white/10">
                             {filteredTransactions.map(transaction => (
-                                <div key={transaction.id} className="p-6 hover:bg-white/5 transition-colors">
-                                    <div className="flex justify-between items-center">
+                                <div key={transaction.id} className="p-6 hover:bg-white/5 transition-all duration-300 hover-lift">
+                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                         <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-2">
+                                            <div className="flex flex-wrap items-center gap-3 mb-3">
                                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                                     transaction.type === 'income' 
                                                         ? 'bg-green-500/20 text-green-400' 
@@ -185,8 +217,8 @@ const MyTransaction = () => {
                                                 </span>
                                                 <span className="text-gray-400 text-sm">{transaction.category}</span>
                                             </div>
-                                            <h4 className="text-white font-semibold text-lg">{transaction.description}</h4>
-                                            <p className="text-gray-400 text-sm">{transaction.date}</p>
+                                            <h4 className="text-white font-semibold text-lg mb-1">{transaction.description}</h4>
+                                            <p className="text-small text-gray-400">{transaction.date}</p>
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <span className={`text-2xl font-bold ${
@@ -196,7 +228,7 @@ const MyTransaction = () => {
                                             </span>
                                             <button
                                                 onClick={() => handleDeleteTransaction(transaction.id)}
-                                                className="text-red-400 hover:text-red-300 p-2 hover:bg-red-500/20 rounded-lg transition-all"
+                                                className="text-red-400 hover:text-red-300 p-2 hover:bg-red-500/20 rounded-lg transition-all duration-300 hover-lift"
                                                 title="Delete transaction"
                                             >
                                                 ×
