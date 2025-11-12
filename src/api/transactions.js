@@ -23,9 +23,9 @@ export const saveTransaction = async (transactionData) => {
     }
 };
 
-export const getTransactions = async (email) => {
+export const getTransactions = async (email, sortBy = 'date', sortOrder = 'desc') => {
     try {
-        const response = await fetch(`${API_BASE_URL}/my-transactions?email=${email}`);
+        const response = await fetch(`${API_BASE_URL}/my-transactions?email=${email}&sortBy=${sortBy}&sortOrder=${sortOrder}`);
         
         if (!response.ok) {
             throw new Error('Failed to fetch transactions');

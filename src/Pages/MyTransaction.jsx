@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../Components/LoadingSpinner';
 import { getTransactions, deleteTransaction, updateTransaction, getCategories } from '../api/transactions';
-import { FaEdit, FaTrash, FaEye, FaCalendarAlt, FaTag, FaDollarSign, FaTimes, FaSave } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaCalendarAlt, FaTag, FaDollarSign, FaTimes, FaSave, FaSortAmountDown, FaSortAmountUp } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 
 const MyTransaction = () => {
@@ -17,6 +17,7 @@ const MyTransaction = () => {
     const [dataLoading, setDataLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [sortBy, setSortBy] = useState('date');
+    const [sortOrder, setSortOrder] = useState('desc');
     const [searchTerm, setSearchTerm] = useState('');
     const [editModal, setEditModal] = useState({ isOpen: false, transaction: null });
     const [categories, setCategories] = useState([]);
@@ -25,7 +26,7 @@ const MyTransaction = () => {
     const fetchUserTransactions = useCallback(async () => {
         try {
             setDataLoading(true);
-            const data = await getTransactions(user.email);
+            const data = await getTransactions(user.email, sortBy, sortOrder);
             setTransactions(data);
             setFilteredTransactions(data);
         } catch (error) {
@@ -34,7 +35,7 @@ const MyTransaction = () => {
         } finally {
             setDataLoading(false);
         }
-    }, [user]);
+    }, [user, sortBy, sortOrder]);
 
     const fetchCategories = useCallback(async () => {
         try {
@@ -123,21 +124,16 @@ const MyTransaction = () => {
             );
         }
 
-        filtered.sort((a, b) => {
-            switch (sortBy) {
-                case 'date':
-                    return new Date(b.date) - new Date(a.date);
-                case 'amount':
-                    return b.amount - a.amount;
-                case 'category':
-                    return a.category.localeCompare(b.category);
-                default:
-                    return 0;
-            }
-        });
-
+        // Backend sorting is already applied, no need to sort again
         setFilteredTransactions(filtered);
-    }, [transactions, filter, sortBy, searchTerm]);
+    }, [transactions, filter, searchTerm]);
+
+    // Refetch data when sort changes
+    useEffect(() => {
+        if (user) {
+            fetchUserTransactions();
+        }
+    }, [sortBy, sortOrder, fetchUserTransactions]);
 
     const handleDeleteTransaction = async (id) => {
         const result = await Swal.fire({
@@ -243,16 +239,35 @@ const MyTransaction = () => {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-base-content mb-2">Sort by</label>
-                            <select
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
-                            >
-                                <option value="date">Date (Newest First)</option>
-                                <option value="amount">Amount (Highest First)</option>
-                                <option value="category">Category (A-Z)</option>
-                            </select>
+                            <label className="block text-sm font-medium text-base-content mb-2">Sort Transactions</label>
+                            <div className="flex gap-3">
+                                <div className="flex-1">
+                                    <select
+                                        value={sortBy}
+                                        onChange={(e) => setSortBy(e.target.value)}
+                                        className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all text-sm"
+                                    >
+                                        <option value="date">Date</option>
+                                        <option value="amount">Amount</option>
+                                    </select>
+                                </div>
+                                <div className="flex-1">
+                                    <select
+                                        value={sortOrder}
+                                        onChange={(e) => setSortOrder(e.target.value)}
+                                        className="w-full px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all text-sm"
+                                    >
+                                        <option value="desc">Newest/Highest</option>
+                                        <option value="asc">Oldest/Lowest</option>
+                                    </select>
+                                </div>
+                                <div className="flex items-center px-2">
+                                    {sortOrder === 'desc' ? 
+                                        <FaSortAmountDown className="text-orange-500" /> : 
+                                        <FaSortAmountUp className="text-orange-500" />
+                                    }
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

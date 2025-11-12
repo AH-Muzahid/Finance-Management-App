@@ -82,7 +82,7 @@ const Home = () => {
                     {/* Additional Metrics */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
                         {/* Total Transactions */}
-                        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <div className="relative overflow-hidden rounded-lg bg-linear-to-br from-purple-500 via-purple-600 to-purple-700 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
                             <div className="absolute -right-2 -top-2 h-12 w-12 rounded-full bg-white/10"></div>
                             <div className="absolute -right-1 -top-1 h-6 w-6 rounded-full bg-white/10"></div>
                             <div className="relative">
@@ -97,7 +97,7 @@ const Home = () => {
                         </div>
 
                         {/* Average Expense */}
-                        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <div className="relative overflow-hidden rounded-lg bg-linear-to-br from-orange-500 via-orange-600 to-red-500 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
                             <div className="absolute -right-2 -top-2 h-12 w-12 rounded-full bg-white/10"></div>
                             <div className="absolute -right-1 -top-1 h-6 w-6 rounded-full bg-white/10"></div>
                             <div className="relative">
@@ -116,7 +116,7 @@ const Home = () => {
                         </div>
 
                         {/* Savings Rate */}
-                        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-teal-500 via-teal-600 to-cyan-600 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <div className="relative overflow-hidden rounded-lg bg-linear-to-br from-teal-500 via-teal-600 to-cyan-600 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
                             <div className="absolute -right-2 -top-2 h-12 w-12 rounded-full bg-white/10"></div>
                             <div className="absolute -right-1 -top-1 h-6 w-6 rounded-full bg-white/10"></div>
                             <div className="relative">
@@ -133,7 +133,7 @@ const Home = () => {
                         </div>
 
                         {/* Categories */}
-                        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                        <div className="relative overflow-hidden rounded-lg bg-linear-to-br from-indigo-500 via-indigo-600 to-blue-600 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
                             <div className="absolute -right-2 -top-2 h-12 w-12 rounded-full bg-white/10"></div>
                             <div className="absolute -right-1 -top-1 h-6 w-6 rounded-full bg-white/10"></div>
                             <div className="relative">
@@ -153,7 +153,7 @@ const Home = () => {
                     {/* Financial Summary Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                         {/* Total Income */}
-                        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl p-6 border border-green-200 dark:border-green-700">
+                        <div className="bg-linear-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl p-6 border border-green-200 dark:border-green-700">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
                                     <FaDollarSign className="text-white text-xl" />
@@ -169,7 +169,7 @@ const Home = () => {
                         </div>
 
                         {/* Total Expenses */}
-                        <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900 dark:to-red-800 rounded-xl p-6 border border-red-200 dark:border-red-700">
+                        <div className="bg-linear-to-br from-red-50 to-red-100 dark:from-red-900 dark:to-red-800 rounded-xl p-6 border border-red-200 dark:border-red-700">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
                                     <FaDollarSign className="text-white text-xl" />
@@ -185,7 +185,7 @@ const Home = () => {
                         </div>
 
                         {/* Net Balance */}
-                        <div className={`bg-gradient-to-br rounded-xl p-6 border ${
+                        <div className={`bg-linear-to-br rounded-xl p-6 border ${
                             balance >= 0
                                 ? 'from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border-blue-200 dark:border-blue-700'
                                 : 'from-orange-50 to-orange-100 dark:from-orange-900 dark:to-orange-800 border-orange-200 dark:border-orange-700'

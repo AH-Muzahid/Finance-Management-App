@@ -153,7 +153,7 @@ const Reports = () => {
     const fetchUserTransactions = useCallback(async () => {
         try {
             setDataLoading(true);
-            const data = await getTransactions(user?.email);
+            const data = await getTransactions(user?.email, 'date', 'desc');
             setTransactions(data);
         } catch (error) {
             console.error('Error fetching transactions:', error);
