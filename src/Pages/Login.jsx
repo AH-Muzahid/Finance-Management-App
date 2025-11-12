@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../Firebase/firebase.init';
+import toast from 'react-hot-toast';
 
 import { FaEye, FaEyeSlash, FaGoogle, FaEnvelope, FaLock, FaRocket } from 'react-icons/fa';
 
 const provider = new GoogleAuthProvider();
 
 const LogIn = () => {
-    const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
     const navigate = useNavigate();
@@ -19,16 +19,10 @@ const LogIn = () => {
         document.title = 'Sign In - Finance Management';
     }, []);
 
-    useEffect(() => {
-        if (error) {
-            const timer = setTimeout(() => setError(''), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [error]);
+
 
     const handleLogin = (event) => {
         event.preventDefault();
-        setError('');
         
         const form = event.target;
         const email = form.email.value;
@@ -37,30 +31,31 @@ const LogIn = () => {
         signInWithEmailAndPassword(auth, email, password)
             .then(result => {
                 form.reset();
+                toast.success('Login successful! Welcome back.');
                 navigate(from, { replace: true });
             })
             .catch(error => {
                 if (error.code === 'auth/invalid-credential') {
-                    setError('Incorrect email or password. Please try again.');
+                    toast.error('Incorrect email or password. Please try again.');
                 } else if (error.code === 'auth/user-not-found') {
-                    setError('No account found with this email.');
+                    toast.error('No account found with this email.');
                 } else if (error.code === 'auth/wrong-password') {
-                    setError('Incorrect password.');
+                    toast.error('Incorrect password.');
                 } else {
-                    setError('Login failed. Please try again.');
+                    toast.error('Login failed. Please try again.');
                 }
             });
     };
 
     const handleGoogleLogin = () => {
-        setError('');
         
         signInWithPopup(auth, provider)
             .then(result => {
+                toast.success('Google login successful! Welcome back.');
                 navigate(from, { replace: true });
             })
             .catch(error => {
-                setError('Google login failed. Please try again.');
+                toast.error('Google login failed. Please try again.');
             });
     };
 
@@ -126,11 +121,7 @@ const LogIn = () => {
                             </div>
                         </div>
                         
-                        {error && (
-                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg p-4">
-                                <span className="font-medium">{error}</span>
-                            </div>
-                        )}
+
                         
                         <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
                             <FaRocket/> Sign In

@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from 'firebase/auth';
 import { auth } from '../Firebase/firebase.init';
+import toast from 'react-hot-toast';
 
 import { FaEye, FaEyeSlash, FaGoogle, FaEnvelope, FaLock, FaUser, FaRocket, FaImage } from 'react-icons/fa';
 
 const provider = new GoogleAuthProvider();
 
 const Registration = () => {
-    const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,12 +25,7 @@ const Registration = () => {
         document.title = 'Sign Up - Finance Management';
     }, []);
 
-    useEffect(() => {
-        if (error) {
-            const timer = setTimeout(() => setError(''), 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [error]);
+
 
     useEffect(() => {
         setPasswordValidation({
@@ -43,7 +38,6 @@ const Registration = () => {
 
     const handleRegister = (event) => {
         event.preventDefault();
-        setError('');
         
         const form = event.target;
         const name = form.name.value;
@@ -52,12 +46,12 @@ const Registration = () => {
         const password = form.password.value;
 
         if (!passwordValidation.length || !passwordValidation.capital || !passwordValidation.lowercase) {
-            setError('Password must meet all requirements.');
+            toast.error('Password must meet all requirements.');
             return;
         }
 
         if (!passwordValidation.match) {
-            setError('Passwords do not match.');
+            toast.error('Passwords do not match.');
             return;
         }
 
@@ -70,28 +64,29 @@ const Registration = () => {
                 form.reset();
                 setPassword('');
                 setConfirmPassword('');
+                toast.success('Registration successful! Welcome to FinEase.');
                 navigate('/');
             })
             .catch(error => {
                 if (error.code === 'auth/email-already-in-use') {
-                    setError('Email is already registered. Please use a different email.');
+                    toast.error('Email is already registered. Please use a different email.');
                 } else if (error.code === 'auth/weak-password') {
-                    setError('Password is too weak. Please choose a stronger password.');
+                    toast.error('Password is too weak. Please choose a stronger password.');
                 } else {
-                    setError('Registration failed. Please try again.');
+                    toast.error('Registration failed. Please try again.');
                 }
             });
     };
 
     const handleGoogleLogin = () => {
-        setError('');
         
         signInWithPopup(auth, provider)
             .then(result => {
+                toast.success('Google registration successful! Welcome to FinEase.');
                 navigate('/');
             })
             .catch(error => {
-                setError('Google registration failed. Please try again.');
+                toast.error('Google registration failed. Please try again.');
             });
     };
 
@@ -207,11 +202,7 @@ const Registration = () => {
                             )}
                         </div>
                         
-                        {error && (
-                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg p-4">
-                                <span className="font-medium">{error}</span>
-                            </div>
-                        )}
+
                         
                         <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
                             <FaRocket/> Sign Up

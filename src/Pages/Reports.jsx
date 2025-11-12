@@ -220,7 +220,7 @@ const Reports = () => {
                 {/* Beautiful Overview Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {/* Total Income Card */}
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-500 via-green-600 to-green-700 p-6 text-white shadow-xl">
+                    <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-green-500 via-green-600 to-green-700 p-6 text-white shadow-xl">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10"></div>
                         <div className="absolute -right-2 -top-2 h-16 w-16 rounded-full bg-white/10"></div>
                         <div className="relative">
@@ -242,7 +242,7 @@ const Reports = () => {
                     </div>
 
                     {/* Total Expenses Card */}
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 p-6 text-white shadow-xl">
+                    <div className="relative overflow-hidden rounded-2xl bg-linear-to-br from-red-500 via-red-600 to-red-700 p-6 text-white shadow-xl">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10"></div>
                         <div className="absolute -right-2 -top-2 h-16 w-16 rounded-full bg-white/10"></div>
                         <div className="relative">
@@ -264,7 +264,7 @@ const Reports = () => {
                     </div>
 
                     {/* Net Balance Card */}
-                    <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${netBalance >= 0 ? 'from-blue-500 via-blue-600 to-blue-700' : 'from-orange-500 via-orange-600 to-orange-700'} p-6 text-white shadow-xl`}>
+                    <div className={`relative overflow-hidden rounded-2xl bg-linear-to-br ${netBalance >= 0 ? 'from-blue-500 via-blue-600 to-blue-700' : 'from-orange-500 via-orange-600 to-orange-700'} p-6 text-white shadow-xl`}>
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10"></div>
                         <div className="absolute -right-2 -top-2 h-16 w-16 rounded-full bg-white/10"></div>
                         <div className="relative">
@@ -327,14 +327,14 @@ const Reports = () => {
                         <ResponsiveContainer width="100%" height={300}>
                             <AreaChart data={monthlyData}>
                                 <defs>
-                                    <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <linearlinear id="incomelinear" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
                                         <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                                    </linearGradient>
-                                    <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
+                                    </linearlinear>
+                                    <linearlinear id="expenselinear" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3}/>
                                         <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
-                                    </linearGradient>
+                                    </linearlinear>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                                 <XAxis 
@@ -361,14 +361,14 @@ const Reports = () => {
                                     dataKey="income"
                                     stroke="#10B981"
                                     strokeWidth={2}
-                                    fill="url(#incomeGradient)"
+                                    fill="url(#incomelinear)"
                                 />
                                 <Area
                                     type="monotone"
                                     dataKey="expenses"
                                     stroke="#EF4444"
                                     strokeWidth={2}
-                                    fill="url(#expenseGradient)"
+                                    fill="url(#expenselinear)"
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
@@ -569,7 +569,7 @@ const Reports = () => {
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
+                    <div className="bg-linear-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-green-100 text-sm">Savings Rate</p>
@@ -579,7 +579,7 @@ const Reports = () => {
                         </div>
                     </div>
                     
-                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                    <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-blue-100 text-sm">Avg Transaction</p>
@@ -589,7 +589,7 @@ const Reports = () => {
                         </div>
                     </div>
                     
-                    <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+                    <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-purple-100 text-sm">Total Transactions</p>
@@ -599,7 +599,7 @@ const Reports = () => {
                         </div>
                     </div>
                     
-                    <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
+                    <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-orange-100 text-sm">Categories</p>
