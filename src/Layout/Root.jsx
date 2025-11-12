@@ -1,6 +1,5 @@
 import React from 'react';
 import Footer from '../Components/Footer';
-
 import { Outlet } from 'react-router';
 import Navbar from '../Components/Navbar';
 

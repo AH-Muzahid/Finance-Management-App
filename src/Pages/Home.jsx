@@ -3,7 +3,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
 import { Link } from 'react-router';
 
-import { FaPlus, FaDollarSign, FaCreditCard, FaChartLine, FaLightbulb, FaBullseye, FaCheck } from 'react-icons/fa';
+import { FaPlus, FaDollarSign, FaCreditCard, FaChartLine, FaLightbulb, FaBullseye, FaCheck, FaEye, FaFileInvoiceDollar, FaCalendarAlt, FaTag, FaArrowRight } from 'react-icons/fa';
 import LoadingSpinner from '../Components/LoadingSpinner';
 import { getTransactions } from '../api/transactions';
 
@@ -38,6 +38,22 @@ const Home = () => {
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     const balance = totalIncome - totalExpenses;
 
+    // Recent transactions (last 5)
+    const recentTransactions = transactions
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5);
+
+    // This month's data
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const thisMonthTransactions = transactions.filter(t => {
+        const transactionDate = new Date(t.date);
+        return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+    });
+    
+    const thisMonthIncome = thisMonthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+    const thisMonthExpenses = thisMonthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
     if (authLoading || dataLoading) {
         return <LoadingSpinner fullScreen />;
     }
@@ -65,67 +81,258 @@ const Home = () => {
 
                     {/* Additional Metrics */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-                        <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
-                            <h4 className="text-sm font-medium text-base-content/70 mb-2">Transactions</h4>
-                            <p className="text-2xl font-bold text-base-content">{transactions.length}</p>
+                        {/* Total Transactions */}
+                        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                            <div className="absolute -right-2 -top-2 h-12 w-12 rounded-full bg-white/10"></div>
+                            <div className="absolute -right-1 -top-1 h-6 w-6 rounded-full bg-white/10"></div>
+                            <div className="relative">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="rounded-full bg-white/20 p-1.5">
+                                        <FaFileInvoiceDollar className="h-3 w-3" />
+                                    </div>
+                                </div>
+                                <h4 className="text-purple-100 text-xs font-medium mb-1">Transactions</h4>
+                                <p className="text-xl font-bold">{transactions.length}</p>
+                            </div>
                         </div>
-                        <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
-                            <h4 className="text-sm font-medium text-base-content/70 mb-2">Avg. Expense</h4>
-                            <p className="text-2xl font-bold text-base-content">
-                                ${transactions.filter(t => t.type === 'expense').length > 0
-                                    ? Math.round(totalExpenses / transactions.filter(t => t.type === 'expense').length).toLocaleString()
-                                    : '0'}
+
+                        {/* Average Expense */}
+                        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-orange-500 via-orange-600 to-red-500 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                            <div className="absolute -right-2 -top-2 h-12 w-12 rounded-full bg-white/10"></div>
+                            <div className="absolute -right-1 -top-1 h-6 w-6 rounded-full bg-white/10"></div>
+                            <div className="relative">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="rounded-full bg-white/20 p-1.5">
+                                        <FaDollarSign className="h-3 w-3" />
+                                    </div>
+                                </div>
+                                <h4 className="text-orange-100 text-xs font-medium mb-1">Avg. Expense</h4>
+                                <p className="text-lg font-bold">
+                                    BDT {transactions.filter(t => t.type === 'expense').length > 0
+                                        ? Math.round(totalExpenses / transactions.filter(t => t.type === 'expense').length).toLocaleString()
+                                        : '0'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Savings Rate */}
+                        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-teal-500 via-teal-600 to-cyan-600 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                            <div className="absolute -right-2 -top-2 h-12 w-12 rounded-full bg-white/10"></div>
+                            <div className="absolute -right-1 -top-1 h-6 w-6 rounded-full bg-white/10"></div>
+                            <div className="relative">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="rounded-full bg-white/20 p-1.5">
+                                        <FaChartLine className="h-3 w-3" />
+                                    </div>
+                                </div>
+                                <h4 className="text-teal-100 text-xs font-medium mb-1">Savings Rate</h4>
+                                <p className="text-xl font-bold">
+                                    {totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0}%
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Categories */}
+                        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-600 p-4 text-white shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                            <div className="absolute -right-2 -top-2 h-12 w-12 rounded-full bg-white/10"></div>
+                            <div className="absolute -right-1 -top-1 h-6 w-6 rounded-full bg-white/10"></div>
+                            <div className="relative">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="rounded-full bg-white/20 p-1.5">
+                                        <FaTag className="h-3 w-3" />
+                                    </div>
+                                </div>
+                                <h4 className="text-indigo-100 text-xs font-medium mb-1">Categories</h4>
+                                <p className="text-xl font-bold">
+                                    {[...new Set(transactions.map(t => t.category))].length}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Financial Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                        {/* Total Income */}
+                        <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 rounded-xl p-6 border border-green-200 dark:border-green-700">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                                    <FaDollarSign className="text-white text-xl" />
+                                </div>
+                                <span className="text-green-600 dark:text-green-400 text-sm font-medium">INCOME</span>
+                            </div>
+                            <h3 className="text-3xl font-bold text-green-700 dark:text-green-300 mb-2">
+                                BDT {totalIncome.toLocaleString()}
+                            </h3>
+                            <p className="text-green-600 dark:text-green-400 text-sm">
+                                {transactions.filter(t => t.type === 'income').length} transactions
                             </p>
                         </div>
-                        <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
-                            <h4 className="text-sm font-medium text-base-content/70 mb-2">Savings Rate</h4>
-                            <p className="text-2xl font-bold text-base-content">
-                                {totalIncome > 0 ? Math.round((balance / totalIncome) * 100) : 0}%
+
+                        {/* Total Expenses */}
+                        <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900 dark:to-red-800 rounded-xl p-6 border border-red-200 dark:border-red-700">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center">
+                                    <FaDollarSign className="text-white text-xl" />
+                                </div>
+                                <span className="text-red-600 dark:text-red-400 text-sm font-medium">EXPENSES</span>
+                            </div>
+                            <h3 className="text-3xl font-bold text-red-700 dark:text-red-300 mb-2">
+                                BDT {totalExpenses.toLocaleString()}
+                            </h3>
+                            <p className="text-red-600 dark:text-red-400 text-sm">
+                                {transactions.filter(t => t.type === 'expense').length} transactions
                             </p>
                         </div>
-                        <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
-                            <h4 className="text-sm font-medium text-base-content/70 mb-2">Categories</h4>
-                            <p className="text-2xl font-bold text-base-content">
-                                {[...new Set(transactions.map(t => t.category))].length}
+
+                        {/* Net Balance */}
+                        <div className={`bg-gradient-to-br rounded-xl p-6 border ${
+                            balance >= 0
+                                ? 'from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border-blue-200 dark:border-blue-700'
+                                : 'from-orange-50 to-orange-100 dark:from-orange-900 dark:to-orange-800 border-orange-200 dark:border-orange-700'
+                        }`}>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                    balance >= 0 ? 'bg-blue-500' : 'bg-orange-500'
+                                }`}>
+                                    <FaDollarSign className="text-white text-xl" />
+                                </div>
+                                <span className={`text-sm font-medium ${
+                                    balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'
+                                }`}>NET BALANCE</span>
+                            </div>
+                            <h3 className={`text-3xl font-bold mb-2 ${
+                                balance >= 0 ? 'text-blue-700 dark:text-blue-300' : 'text-orange-700 dark:text-orange-300'
+                            }`}>
+                                BDT {balance.toLocaleString()}
+                            </h3>
+                            <p className={`text-sm ${
+                                balance >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'
+                            }`}>
+                                {balance >= 0 ? 'Positive balance' : 'Negative balance'}
                             </p>
                         </div>
                     </div>
 
-                    {/* Main Stats */}
-
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-
-
-                        <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
-                            <div className="w-20 h-20 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <FaDollarSign className="text-3xl text-green-600" />
+                    {/* Recent Transactions & Quick Actions */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                        {/* Recent Transactions */}
+                        <div className="lg:col-span-2 bg-white dark:bg-base-200 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-base-300">
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold text-base-content">Recent Transactions</h3>
+                                <Link 
+                                    to="/my-transactions" 
+                                    className="text-orange-500 hover:text-orange-600 text-sm font-medium flex items-center gap-1"
+                                >
+                                    View All <FaArrowRight className="text-xs" />
+                                </Link>
                             </div>
-                            <h3 className="text-xl font-semibold text-base-content mb-2">Total Income</h3>
-                            <p className="text-4xl font-bold text-green-600 mb-2">${totalIncome.toLocaleString()}</p>
-                            <p className="text-sm text-base-content/60">This month</p>
+                            
+                            {recentTransactions.length === 0 ? (
+                                <div className="text-center py-8">
+                                    <p className="text-base-content/70 mb-4">No transactions yet</p>
+                                    <Link 
+                                        to="/add-transaction"
+                                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors inline-block"
+                                    >
+                                        Add Your First Transaction
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {recentTransactions.map(transaction => (
+                                        <div key={transaction._id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                                    transaction.type === 'income' 
+                                                        ? 'bg-green-100 dark:bg-green-900' 
+                                                        : 'bg-red-100 dark:bg-red-900'
+                                                }`}>
+                                                    <FaDollarSign className={`text-sm ${
+                                                        transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                                                    }`} />
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-base-content text-sm">{transaction.description}</p>
+                                                    <div className="flex items-center gap-2 text-xs text-base-content/70">
+                                                        <FaTag className="text-orange-500" />
+                                                        <span className="capitalize">{transaction.category}</span>
+                                                        <span>•</span>
+                                                        <span>{new Date(transaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className={`font-semibold ${
+                                                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                                                }`}>
+                                                    {transaction.type === 'income' ? '+' : '-'}BDT {transaction.amount.toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
-                        <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
-                            <div className="w-20 h-20 bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900 dark:to-red-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <FaCreditCard className="text-3xl text-red-600" />
+                        {/* Quick Actions & This Month Summary */}
+                        <div className="space-y-6">
+                            {/* Quick Actions */}
+                            <div className="bg-white dark:bg-base-200 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-base-300">
+                                <h3 className="text-lg font-bold text-base-content mb-4">Quick Actions</h3>
+                                <div className="space-y-3">
+                                    <Link 
+                                        to="/add-transaction"
+                                        className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <FaPlus /> Add Transaction
+                                    </Link>
+                                    <Link 
+                                        to="/my-transactions"
+                                        className="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <FaEye /> View Transactions
+                                    </Link>
+                                    <Link 
+                                        to="/reports"
+                                        className="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <FaChartLine /> View Reports
+                                    </Link>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-semibold text-base-content mb-2">Total Expenses</h3>
-                            <p className="text-4xl font-bold text-red-600 mb-2">${totalExpenses.toLocaleString()}</p>
-                            <p className="text-sm text-base-content/60">This month</p>
-                        </div>
 
-                        <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
-                            <div className="w-20 h-20 bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <FaChartLine className="text-3xl text-orange-600" />
+                            {/* This Month Summary */}
+                            <div className="bg-white dark:bg-base-200 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-base-300">
+                                <h3 className="text-lg font-bold text-base-content mb-4 flex items-center gap-2">
+                                    <FaCalendarAlt className="text-orange-500" />
+                                    This Month
+                                </h3>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-base-content/70 text-sm">Income</span>
+                                        <span className="font-semibold text-green-600">BDT {thisMonthIncome.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-base-content/70 text-sm">Expenses</span>
+                                        <span className="font-semibold text-red-600">BDT {thisMonthExpenses.toLocaleString()}</span>
+                                    </div>
+                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-2">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-base-content font-medium text-sm">Net</span>
+                                            <span className={`font-bold ${
+                                                (thisMonthIncome - thisMonthExpenses) >= 0 ? 'text-blue-600' : 'text-orange-600'
+                                            }`}>
+                                                BDT {(thisMonthIncome - thisMonthExpenses).toLocaleString()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="text-center pt-2">
+                                        <span className="text-xs text-base-content/60">
+                                            {thisMonthTransactions.length} transactions this month
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-semibold text-base-content mb-2">Net Balance</h3>
-                            <p className={`text-4xl font-bold mb-2 ${balance >= 0 ? 'text-orange-600' : 'text-red-600'}`}>
-                                ${balance.toLocaleString()}
-                            </p>
-                            <p className={`text-sm ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {balance >= 0 ? '↗ Positive' : '↘ Negative'} Balance
-                            </p>
                         </div>
                     </div>
                 </div>

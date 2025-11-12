@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaDollarSign, FaCalendarAlt, FaTag, FaStickyNote, FaPlus, FaUtensils, FaCar, FaShoppingCart, FaGamepad, FaFileInvoiceDollar, FaEllipsisH, FaLaptop, FaChartLine, FaBriefcase } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { FaDollarSign, FaCalendarAlt, FaTag, FaStickyNote, FaPlus, FaUtensils, FaCar, FaShoppingCart, FaGamepad, FaFileInvoiceDollar, FaEllipsisH, FaLaptop, FaChartLine, FaBriefcase, FaChevronDown } from 'react-icons/fa';
 import { getCategories, saveTransaction } from '../api/transactions';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
@@ -11,10 +11,23 @@ const AddTransaction = () => {
     const navigate = useNavigate();
     const [type, setType] = useState('expense');
     const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     useEffect(() => {
         document.title = 'Add Transaction - Finance Management';
         fetchCategories();
+        
+        // Close dropdown when clicking outside
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
+        };
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const fetchCategories = async () => {
@@ -23,6 +36,35 @@ const AddTransaction = () => {
             setCategories(data);
         } catch (error) {
             console.error('Error fetching categories:', error);
+        }
+    };
+
+    const resetCategories = async () => {
+        try {
+            const response = await fetch('http://localhost:3000/api/reset-categories', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = await response.json();
+            if (result.success) {
+                await fetchCategories();
+                Swal.fire({
+                    title: 'Success!',
+                    text: `Categories updated! ${result.insertedCount} categories loaded.`,
+                    icon: 'success',
+                    confirmButtonColor: '#f97316'
+                });
+            }
+        } catch (error) {
+            console.error('Error resetting categories:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to update categories',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
         }
     };
 
@@ -56,10 +98,11 @@ const AddTransaction = () => {
             });
             
             if (swalResult.isConfirmed) {
-                navigate('/transactions');
+                navigate('/my-transactions');
             } else {
                 form.reset();
                 setType('expense');
+                setSelectedCategory('');
             }
         } catch (error) {
             console.error('Error saving transaction:', error);
@@ -85,6 +128,15 @@ const AddTransaction = () => {
                             Add Transaction
                         </h1>
                         <p className="text-base-content/70">Track your income and expenses</p>
+                        {categories.length < 20 && (
+                            <button
+                                type="button"
+                                onClick={resetCategories}
+                                className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors"
+                            >
+                                Load More Categories
+                            </button>
+                        )}
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -132,25 +184,39 @@ const AddTransaction = () => {
                             />
                         </div>
 
-                        <div>
+                        <div className="relative" ref={dropdownRef}>
                             <div className="mb-2">
                                 <span className="font-medium flex items-center gap-2 text-base-content"><FaTag className="text-orange-500" /> Category</span>
                             </div>
-                            <select
-                                name="category"
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
-                                required
+                            <input type="hidden" name="category" value={selectedCategory} required />
+                            <div 
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all cursor-pointer flex items-center justify-between"
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             >
-                                <option value="">Select category</option>
-                                {categories
-                                    .filter(cat => cat.type === type)
-                                    .map(category => (
-                                        <option key={category._id} value={category.name.toLowerCase()}>
-                                            {category.name}
-                                        </option>
-                                    ))
-                                }
-                            </select>
+                                <span className={selectedCategory ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400'}>
+                                    {selectedCategory ? categories.find(cat => cat.name.toLowerCase() === selectedCategory)?.name : 'Select category'}
+                                </span>
+                                <FaChevronDown className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                            </div>
+                            {isDropdownOpen && (
+                                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                    {categories
+                                        .filter(cat => cat.type === type)
+                                        .map(category => (
+                                            <div
+                                                key={category._id}
+                                                className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-black dark:text-white"
+                                                onClick={() => {
+                                                    setSelectedCategory(category.name.toLowerCase());
+                                                    setIsDropdownOpen(false);
+                                                }}
+                                            >
+                                                {category.name}
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                            )}
                         </div>
 
                         <div>
@@ -175,6 +241,30 @@ const AddTransaction = () => {
                                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all resize-none"
                                 placeholder="Enter description (optional)"
                                 rows="3"
+                            />
+                        </div>
+
+                        <div>
+                            <div className="mb-2">
+                                <span className="font-medium flex items-center gap-2 text-base-content"><FaBriefcase className="text-orange-500" /> User Name</span>
+                            </div>
+                            <input
+                                type="text"
+                                value={user?.displayName || 'N/A'}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg cursor-not-allowed"
+                                readOnly
+                            />
+                        </div>
+
+                        <div>
+                            <div className="mb-2">
+                                <span className="font-medium flex items-center gap-2 text-base-content"><FaFileInvoiceDollar className="text-orange-500" /> User Email</span>
+                            </div>
+                            <input
+                                type="email"
+                                value={user?.email || 'N/A'}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg cursor-not-allowed"
+                                readOnly
                             />
                         </div>
 

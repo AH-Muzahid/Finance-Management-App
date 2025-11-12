@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
-import { getTransaction, deleteTransaction } from '../api/transactions';
+import { getTransaction, deleteTransaction, getTransactions } from '../api/transactions';
 import { FaArrowLeft, FaEdit, FaTrash, FaCalendarAlt, FaTag, FaDollarSign, FaStickyNote } from 'react-icons/fa';
 import LoadingSpinner from '../Components/LoadingSpinner';
 import Swal from 'sweetalert2';
@@ -13,19 +13,25 @@ const TransactionDetails = () => {
     const [user] = useAuthState(auth);
     const [transaction, setTransaction] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [categoryTotal, setCategoryTotal] = useState(0);
 
-    useEffect(() => {
-        document.title = 'Transaction Details - Finance Management';
-        if (id) {
-            fetchTransaction();
-        }
-    }, [id]);
-
-    const fetchTransaction = async () => {
+    const fetchTransaction = useCallback(async () => {
         try {
             setLoading(true);
+            console.log('Fetching transaction with ID:', id);
             const data = await getTransaction(id);
+            console.log('Transaction data received:', data);
             setTransaction(data);
+            
+            // Calculate category total
+            if (user && data) {
+                const allTransactions = await getTransactions(user.email);
+                const categoryTransactions = allTransactions.filter(t => 
+                    t.category === data.category && t.type === data.type
+                );
+                const total = categoryTransactions.reduce((sum, t) => sum + t.amount, 0);
+                setCategoryTotal(total);
+            }
         } catch (error) {
             console.error('Error fetching transaction:', error);
             Swal.fire({
@@ -37,7 +43,14 @@ const TransactionDetails = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, user]);
+
+    useEffect(() => {
+        document.title = 'Transaction Details - Finance Management';
+        if (id && user) {
+            fetchTransaction();
+        }
+    }, [id, user, fetchTransaction]);
 
     const handleDelete = async () => {
         const result = await Swal.fire({
@@ -127,7 +140,7 @@ const TransactionDetails = () => {
                             <span className={`text-4xl font-bold ${
                                 transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                             }`}>
-                                {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()}
+                                {transaction.type === 'income' ? '+' : '-'}BDT {transaction.amount.toLocaleString()}
                             </span>
                         </div>
                     </div>
@@ -138,9 +151,12 @@ const TransactionDetails = () => {
                             <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
                                 <FaTag className="text-orange-500 text-xl" />
                             </div>
-                            <div>
+                            <div className="flex-1">
                                 <p className="text-sm text-base-content/70">Category</p>
                                 <p className="text-lg font-semibold text-base-content capitalize">{transaction.category}</p>
+                                <p className="text-sm text-base-content/60 mt-1">
+                                    Total in this category: <span className="font-semibold">BDT {categoryTotal.toLocaleString()}</span>
+                                </p>
                             </div>
                         </div>
 

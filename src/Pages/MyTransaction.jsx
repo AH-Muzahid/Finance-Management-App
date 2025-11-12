@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
-import { Link, useLocation } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../Components/LoadingSpinner';
 import { getTransactions, deleteTransaction, updateTransaction, getCategories } from '../api/transactions';
@@ -11,6 +11,7 @@ import Swal from 'sweetalert2';
 const MyTransaction = () => {
     const [user, authLoading] = useAuthState(auth);
     const location = useLocation();
+    const navigate = useNavigate();
     const [transactions, setTransactions] = useState([]);
     const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [dataLoading, setDataLoading] = useState(true);
@@ -20,28 +21,6 @@ const MyTransaction = () => {
     const [editModal, setEditModal] = useState({ isOpen: false, transaction: null });
     const [categories, setCategories] = useState([]);
     const [editForm, setEditForm] = useState({});
-
-    useEffect(() => {
-        document.title = 'My Transactions - Finance Management';
-        if (!authLoading && user) {
-            fetchUserTransactions();
-            fetchCategories();
-        }
-    }, [authLoading, user, fetchUserTransactions, fetchCategories]);
-
-    useEffect(() => {
-        if (location.state?.editTransaction) {
-            const transaction = location.state.editTransaction;
-            setEditForm({
-                type: transaction.type,
-                category: transaction.category,
-                amount: transaction.amount,
-                description: transaction.description,
-                date: transaction.date
-            });
-            setEditModal({ isOpen: true, transaction });
-        }
-    }, [location.state]);
 
     const fetchUserTransactions = useCallback(async () => {
         try {
@@ -65,6 +44,28 @@ const MyTransaction = () => {
             console.error('Error fetching categories:', error);
         }
     }, []);
+
+    useEffect(() => {
+        document.title = 'My Transactions - Finance Management';
+        if (!authLoading && user) {
+            fetchUserTransactions();
+            fetchCategories();
+        }
+    }, [authLoading, user, fetchUserTransactions, fetchCategories]);
+
+    useEffect(() => {
+        if (location.state?.editTransaction) {
+            const transaction = location.state.editTransaction;
+            setEditForm({
+                type: transaction.type,
+                category: transaction.category,
+                amount: transaction.amount,
+                description: transaction.description,
+                date: transaction.date
+            });
+            setEditModal({ isOpen: true, transaction });
+        }
+    }, [location.state]);
 
     const handleEditClick = (transaction) => {
         setEditForm({
@@ -93,6 +94,8 @@ const MyTransaction = () => {
                 text: 'Transaction has been updated.',
                 icon: 'success',
                 confirmButtonColor: '#f97316'
+            }).then(() => {
+                navigate(`/transaction/${editModal.transaction._id}`);
             });
         } catch (error) {
             console.error('Error updating transaction:', error);
@@ -200,15 +203,15 @@ const MyTransaction = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
                         <h3 className="text-lg font-semibold text-base-content mb-3">Total Income</h3>
-                        <p className="text-3xl font-bold text-green-600">${totalIncome.toLocaleString()}</p>
+                        <p className="text-3xl font-bold text-green-600">BDT {totalIncome.toLocaleString()}</p>
                     </div>
                     <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
                         <h3 className="text-lg font-semibold text-base-content mb-3">Total Expenses</h3>
-                        <p className="text-3xl font-bold text-red-600">${totalExpenses.toLocaleString()}</p>
+                        <p className="text-3xl font-bold text-red-600">BDT {totalExpenses.toLocaleString()}</p>
                     </div>
                     <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
                         <h3 className="text-lg font-semibold text-base-content mb-3">Net Balance</h3>
-                        <p className={`text-3xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>${balance.toLocaleString()}</p>
+                        <p className={`text-3xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>BDT {balance.toLocaleString()}</p>
                     </div>
                 </div>
 
@@ -273,35 +276,49 @@ const MyTransaction = () => {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredTransactions.map(transaction => (
-                                <div key={transaction._id} className="bg-white dark:bg-base-200 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
-                                    {/* Transaction Type Badge */}
-                                    <div className="flex justify-between items-start mb-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                <div key={transaction._id} className="bg-white dark:bg-base-200 rounded-2xl p-6 shadow-md hover:shadow-xl border border-gray-100 dark:border-base-300 transition-all duration-300 hover:scale-[1.02]">
+                                    {/* Header with Amount and Type */}
+                                    <div className="flex justify-between items-center mb-4">
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
                                             transaction.type === 'income' 
-                                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                                ? 'bg-green-100 dark:bg-green-900' 
+                                                : 'bg-red-100 dark:bg-red-900'
                                         }`}>
-                                            {transaction.type.toUpperCase()}
-                                        </span>
-                                        <span className={`text-2xl font-bold ${
-                                            transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                                        }`}>
-                                            {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()}
-                                        </span>
+                                            <FaDollarSign className={`text-lg ${
+                                                transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                                            }`} />
+                                        </div>
+                                        <div className="text-right">
+                                            <span className={`text-2xl font-bold ${
+                                                transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                                            }`}>
+                                                {transaction.type === 'income' ? '+' : '-'}BDT {transaction.amount.toLocaleString()}
+                                            </span>
+                                            <p className={`text-xs font-medium uppercase tracking-wide ${
+                                                transaction.type === 'income' ? 'text-green-500' : 'text-red-500'
+                                            }`}>
+                                                {transaction.type}
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    {/* Transaction Details */}
+                                    {/* Transaction Info */}
                                     <div className="space-y-3 mb-6">
-                                        <div className="flex items-center gap-2 text-base-content/70">
-                                            <FaTag className="text-orange-500" />
-                                            <span className="font-medium">{transaction.category}</span>
+                                        <div>
+                                            <h3 className="font-semibold text-base-content text-lg mb-1 truncate">
+                                                {transaction.description}
+                                            </h3>
                                         </div>
-                                        <div className="flex items-center gap-2 text-base-content/70">
-                                            <FaCalendarAlt className="text-orange-500" />
-                                            <span>{new Date(transaction.date).toLocaleDateString()}</span>
-                                        </div>
-                                        <div className="text-base-content">
-                                            <p className="font-semibold mb-1">{transaction.description}</p>
+                                        
+                                        <div className="flex items-center justify-between text-sm text-base-content/70">
+                                            <div className="flex items-center gap-2">
+                                                <FaTag className="text-orange-500" />
+                                                <span className="font-medium capitalize">{transaction.category}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <FaCalendarAlt className="text-orange-500" />
+                                                <span>{new Date(transaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -309,21 +326,22 @@ const MyTransaction = () => {
                                     <div className="flex gap-2">
                                         <Link
                                             to={`/transaction/${transaction._id}`}
-                                            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
+                                            className="flex-1 bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm"
+                                            onClick={() => console.log('Navigating to transaction:', transaction._id)}
                                         >
-                                            <FaEye /> View
+                                            <FaEye className="text-xs" /> View
                                         </Link>
                                         <button
                                             onClick={() => handleEditClick(transaction)}
-                                            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
+                                            className="flex-1 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm"
                                         >
-                                            <FaEdit /> Update
+                                            <FaEdit className="text-xs" /> Edit
                                         </button>
                                         <button
                                             onClick={() => handleDeleteTransaction(transaction._id)}
-                                            className="flex-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
+                                            className="flex-1 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm"
                                         >
-                                            <FaTrash /> Delete
+                                            <FaTrash className="text-xs" /> Delete
                                         </button>
                                     </div>
                                 </div>

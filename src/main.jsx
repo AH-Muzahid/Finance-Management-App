@@ -89,11 +89,11 @@ const router = createBrowserRouter([
           </PrivateRoute>
         ),
       },
-      {
-        path: "*",
-        Component: NotFound,
-      },
     ]
+  },
+  {
+    path: "*",
+    Component: NotFound,
   }
 ])
 createRoot(document.getElementById('root')).render(
