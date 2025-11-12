@@ -79,8 +79,9 @@ const AddTransaction = () => {
             category: form.category.value,
             description: form.description.value,
             date: form.date.value,
-            email: user?.email ,
-            name: user?.displayName 
+            email: user?.email,
+            name: user?.displayName,
+            timestamp: new Date().toISOString()
         };
         
         try {

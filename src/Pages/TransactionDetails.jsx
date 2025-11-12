@@ -187,6 +187,26 @@ const TransactionDetails = () => {
                             </div>
                         </div>
 
+                        {/* Timestamp */}
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
+                                <FaCalendarAlt className="text-orange-500 text-xl" />
+                            </div>
+                            <div>
+                                <p className="text-sm text-base-content/70">Created At</p>
+                                <p className="text-lg font-semibold text-base-content">
+                                    {transaction.timestamp ? new Date(transaction.timestamp).toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    }) : 'N/A'}
+                                </p>
+                            </div>
+                        </div>
+
                         {/* User Info */}
                         <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
