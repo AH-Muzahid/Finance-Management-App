@@ -26,7 +26,7 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Home', path: '/', public: true },
         { name: 'Add Transaction', path: '/add-transaction', public: false },
-        { name: 'My Transactions', path: '/transactions', public: false },
+        { name: 'My Transactions', path: '/my-transactions', public: false },
         { name: 'Reports', path: '/reports', public: false }
     ];
 

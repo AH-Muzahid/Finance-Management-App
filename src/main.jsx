@@ -16,6 +16,7 @@ import UpdateProfile from './Components/UpdateProfile';
 import AddTransaction from './Pages/AddTransaction';
 import MyTransaction from './Pages/MyTransaction';
 import Reports from './Pages/Reports';
+import TransactionDetails from './Pages/TransactionDetails';
 import NotFound from './Pages/NotFound';
 import PrivateRoute from './Components/PrivateRoute';
 
@@ -65,10 +66,18 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/transactions",
+        path: "/my-transactions",
         element: (
           <PrivateRoute>
             <MyTransaction />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: "/transaction/:id",
+        element: (
+          <PrivateRoute>
+            <TransactionDetails />
           </PrivateRoute>
         ),
       },
