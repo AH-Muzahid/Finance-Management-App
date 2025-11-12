@@ -5,29 +5,34 @@ import { Link } from 'react-router';
 
 import { FaPlus, FaDollarSign, FaCreditCard, FaChartLine, FaLightbulb, FaBullseye, FaCheck } from 'react-icons/fa';
 import LoadingSpinner from '../Components/LoadingSpinner';
+import { getTransactions } from '../api/transactions';
 
 const Home = () => {
     const [user, authLoading] = useAuthState(auth);
     const [transactions, setTransactions] = useState([]);
     const [dataLoading, setDataLoading] = useState(true);
 
-    
-    // Mock data - replace with Firebase data
-    const mockTransactions = [
-        { id: 1, type: 'expense', category: 'Food', amount: 250, date: '2024-01-15', description: 'Groceries' },
-        { id: 2, type: 'income', category: 'Salary', amount: 3000, date: '2024-01-01', description: 'Monthly salary' },
-        { id: 3, type: 'expense', category: 'Transport', amount: 120, date: '2024-01-10', description: 'Gas' },
-        { id: 4, type: 'expense', category: 'Entertainment', amount: 80, date: '2024-01-12', description: 'Movie tickets' }
-    ];
 
     useEffect(() => {
-        if (!authLoading) {
-            setTimeout(() => {
-                setTransactions(mockTransactions);
-                setDataLoading(false);
-            }, 800);
+        if (!authLoading && user) {
+            fetchUserTransactions();
+        } else if (!authLoading && !user) {
+            setDataLoading(false);
         }
-    }, [authLoading]);
+    }, [authLoading, user]);
+
+    const fetchUserTransactions = async () => {
+        try {
+            setDataLoading(true);
+            const data = await getTransactions(user.email);
+            setTransactions(data);
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            setTransactions([]);
+        } finally {
+            setDataLoading(false);
+        }
+    };
 
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
@@ -51,18 +56,15 @@ const Home = () => {
             </div>
 
             {/* Stats Section */}
-            <div className="bg-gray-50 dark:bg-base-100 py-20">
+            <div className="bg-gray-50 dark:bg-base-100 py-15">
                 <div className="max-w-[1220px] mx-auto px-6">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-bold text-base-content mb-4">Financial Overview</h2>
                         <p className="text-xl text-base-content/70 max-w-2xl mx-auto">Get a comprehensive view of your financial health with real-time insights and analytics</p>
                     </div>
-                
-                    {/* Main Stats */}
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-{/* Additional Metrics */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {/* Additional Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
                         <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
                             <h4 className="text-sm font-medium text-base-content/70 mb-2">Transactions</h4>
                             <p className="text-2xl font-bold text-base-content">{transactions.length}</p>
@@ -70,8 +72,8 @@ const Home = () => {
                         <div className="bg-white dark:bg-base-200 rounded-lg p-6 text-center border border-gray-100 dark:border-base-300">
                             <h4 className="text-sm font-medium text-base-content/70 mb-2">Avg. Expense</h4>
                             <p className="text-2xl font-bold text-base-content">
-                                ${transactions.filter(t => t.type === 'expense').length > 0 
-                                    ? Math.round(totalExpenses / transactions.filter(t => t.type === 'expense').length).toLocaleString() 
+                                ${transactions.filter(t => t.type === 'expense').length > 0
+                                    ? Math.round(totalExpenses / transactions.filter(t => t.type === 'expense').length).toLocaleString()
                                     : '0'}
                             </p>
                         </div>
@@ -89,6 +91,12 @@ const Home = () => {
                         </div>
                     </div>
 
+                    {/* Main Stats */}
+
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+
+
                         <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
                             <div className="w-20 h-20 bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <FaDollarSign className="text-3xl text-green-600" />
@@ -97,7 +105,7 @@ const Home = () => {
                             <p className="text-4xl font-bold text-green-600 mb-2">${totalIncome.toLocaleString()}</p>
                             <p className="text-sm text-base-content/60">This month</p>
                         </div>
-                        
+
                         <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
                             <div className="w-20 h-20 bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900 dark:to-red-800 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <FaCreditCard className="text-3xl text-red-600" />
@@ -106,7 +114,7 @@ const Home = () => {
                             <p className="text-4xl font-bold text-red-600 mb-2">${totalExpenses.toLocaleString()}</p>
                             <p className="text-sm text-base-content/60">This month</p>
                         </div>
-                        
+
                         <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg dark:shadow-none border border-gray-100 dark:border-base-300 hover:shadow-xl transition-shadow">
                             <div className="w-20 h-20 bg-gradient-to-r from-orange-100 to-orange-200 dark:from-orange-900 dark:to-orange-800 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <FaChartLine className="text-3xl text-orange-600" />
@@ -120,8 +128,6 @@ const Home = () => {
                             </p>
                         </div>
                     </div>
-
-                    
                 </div>
             </div>
 
@@ -175,10 +181,10 @@ const Home = () => {
                     </div>
                 </div>
             </div>
-            
+
             {/* FAB Button */}
             {user && (
-                <Link 
+                <Link
                     to="/add-transaction"
                     className="md:hidden fixed bottom-6 right-6 w-16 h-16 bg-orange-500 hover:bg-orange-600 text-white rounded-full shadow-lg flex items-center justify-center transition-colors z-40"
                 >

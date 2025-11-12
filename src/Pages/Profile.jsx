@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { useAuthState, useSignOut } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
 import { updateProfile } from 'firebase/auth';
 
-import { FaUser, FaEnvelope, FaEdit, FaSave, FaTimes } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaEdit, FaSave, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../Components/LoadingSpinner';
+import Swal from 'sweetalert2';
 
 const Profile = () => {
     const [user] = useAuthState(auth);
+    const [signOut] = useSignOut(auth);
 
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -51,6 +53,49 @@ const Profile = () => {
         setIsEditing(false);
     };
 
+    const handleLogout = async () => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will be logged out of your account',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f97316',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, logout!'
+        });
+
+        if (result.isConfirmed) {
+            const success = await signOut();
+            if (success) {
+                Swal.fire({
+                    title: 'Logged out!',
+                    text: 'You have been successfully logged out.',
+                    icon: 'success',
+                    confirmButtonColor: '#f97316'
+                });
+            }
+        }
+    };
+
+    const getInitials = (name) => {
+        if (!name) return 'U';
+        const words = name.trim().split(' ');
+        if (words.length === 1) {
+            return words[0].charAt(0).toUpperCase();
+        }
+        return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+    };
+
+    const getAvatarColor = (name) => {
+        const colors = ['#f97316', '#10B981', '#EF4444', '#3B82F6', '#8B5CF6', '#F59E0B', '#EC4899'];
+        if (!name) return colors[0];
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return colors[Math.abs(hash) % colors.length];
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 p-4">
             <div className="max-w-4xl mx-auto">
@@ -66,15 +111,27 @@ const Profile = () => {
                     <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 p-8">
                         {/* Profile Picture */}
                         <div className="text-center mb-8">
-                            <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden bg-orange-100 dark:bg-orange-900 border-4 border-orange-500 flex items-center justify-center">
+                            <div 
+                                className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-orange-500 flex items-center justify-center"
+                                style={{ 
+                                    backgroundColor: user?.photoURL ? '#f3f4f6' : getAvatarColor(user?.displayName || user?.email || 'User')
+                                }}
+                            >
                                 {user?.photoURL ? (
                                     <img 
                                         src={user.photoURL} 
                                         alt="Profile" 
                                         className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.parentElement.innerHTML = `<span class="text-orange-600 text-3xl font-bold">${getInitials(user?.displayName || user?.email || 'User')}</span>`;
+                                            e.target.parentElement.style.backgroundColor = getAvatarColor(user?.displayName || user?.email || 'User');
+                                        }}
                                     />
                                 ) : (
-                                    <FaUser className="text-orange-500 text-4xl" />
+                                    <span className="text-white text-3xl font-bold">
+                                        {getInitials(user?.displayName || user?.email || 'User')}
+                                    </span>
                                 )}
                             </div>
                             <h2 className="text-2xl font-bold text-base-content mb-2">{user?.displayName || 'User'}</h2>
@@ -117,17 +174,17 @@ const Profile = () => {
                                         name="photoURL"
                                         value={formData.photoURL}
                                         onChange={handleInputChange}
-                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
+                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all overflow-hidden"
                                         placeholder="Enter photo URL"
                                     />
                                 ) : (
-                                    <div className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg cursor-not-allowed text-base-content/70">
+                                    <div className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg cursor-not-allowed text-base-content/70 break-all overflow-hidden">
                                         {user?.photoURL || 'Not set'}
                                     </div>
                                 )}
                             </div>
 
-                            {/* Action Buttons */}
+                            {/* Buttons */}
                             <div className="flex gap-4 pt-6">
                                 {isEditing ? (
                                     <>
@@ -156,12 +213,20 @@ const Profile = () => {
                                         </button>
                                     </>
                                 ) : (
-                                    <button
-                                        onClick={() => setIsEditing(true)}
-                                        className="w-full bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <FaEdit /> Edit Profile
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <FaEdit /> Edit Profile
+                                        </button>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="flex-1 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                                        >
+                                            <FaSignOutAlt /> Logout
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>

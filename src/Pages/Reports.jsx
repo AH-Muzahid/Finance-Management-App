@@ -1,20 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
 import LoadingSpinner from '../Components/LoadingSpinner';
+import { getTransactions } from '../api/transactions';
 
 const Reports = () => {
     const [user, authLoading] = useAuthState(auth);
     const [dataLoading, setDataLoading] = useState(true);
-    const [transactions] = useState([
-        { id: 1, type: 'expense', category: 'Food & Dining', amount: 250, date: '2024-01-15' },
-        { id: 2, type: 'income', category: 'Salary', amount: 3000, date: '2024-01-01' },
-        { id: 3, type: 'expense', category: 'Transportation', amount: 120, date: '2024-01-10' },
-        { id: 4, type: 'expense', category: 'Entertainment', amount: 80, date: '2024-01-12' },
-        { id: 5, type: 'income', category: 'Freelance', amount: 500, date: '2024-01-08' },
-        { id: 6, type: 'expense', category: 'Bills & Utilities', amount: 200, date: '2024-01-05' }
-    ]);
+    const [transactions, setTransactions] = useState([]);
 
     const expensesByCategory = transactions
         .filter(t => t.type === 'expense')
@@ -28,22 +22,50 @@ const Reports = () => {
         value: amount
     }));
 
-    const monthlyData = [
-        { month: 'Jan', income: 3500, expenses: 650 },
-        { month: 'Feb', income: 3200, expenses: 800 },
-        { month: 'Mar', income: 2800, expenses: 750 },
-        { month: 'Apr', income: 3500, expenses: 900 }
-    ];
+    // Generate monthly data from transactions
+    const monthlyData = generateMonthlyData(transactions);
+
+    function generateMonthlyData(transactions) {
+        const monthlyStats = {};
+        
+        transactions.forEach(t => {
+            const month = new Date(t.date).toLocaleDateString('en-US', { month: 'short' });
+            if (!monthlyStats[month]) {
+                monthlyStats[month] = { month, income: 0, expenses: 0 };
+            }
+            
+            if (t.type === 'income') {
+                monthlyStats[month].income += t.amount;
+            } else {
+                monthlyStats[month].expenses += t.amount;
+            }
+        });
+        
+        return Object.values(monthlyStats);
+    }
 
     const COLORS = ['#f97316', '#10B981', '#EF4444', '#3B82F6', '#8B5CF6'];
 
-    useEffect(() => {
-        if (!authLoading) {
-            setTimeout(() => {
-                setDataLoading(false);
-            }, 800);
+    const fetchUserTransactions = useCallback(async () => {
+        try {
+            setDataLoading(true);
+            const data = await getTransactions(user?.email);
+            setTransactions(data);
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            setTransactions([]);
+        } finally {
+            setDataLoading(false);
         }
-    }, [authLoading]);
+    }, [user?.email]);
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            fetchUserTransactions();
+        } else if (!authLoading && !user) {
+            setDataLoading(false);
+        }
+    }, [authLoading, user, fetchUserTransactions]);
 
     if (authLoading || dataLoading) {
         return <LoadingSpinner fullScreen />;

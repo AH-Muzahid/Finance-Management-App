@@ -4,6 +4,8 @@ import { auth } from '../Firebase/firebase.init';
 import { Link } from 'react-router';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../Components/LoadingSpinner';
+import { getTransactions, deleteTransaction } from '../api/transactions';
+import Swal from 'sweetalert2';
 
 const MyTransaction = () => {
     const [user, authLoading] = useAuthState(auth);
@@ -14,27 +16,25 @@ const MyTransaction = () => {
     const [sortBy, setSortBy] = useState('date');
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Mock data - replace with Firebase data
-    const mockTransactions = [
-        { id: 1, type: 'expense', category: 'Food & Dining', amount: 250, date: '2024-01-15', description: 'Groceries at Walmart' },
-        { id: 2, type: 'income', category: 'Salary', amount: 3000, date: '2024-01-01', description: 'Monthly salary' },
-        { id: 3, type: 'expense', category: 'Transportation', amount: 120, date: '2024-01-10', description: 'Gas station' },
-        { id: 4, type: 'expense', category: 'Entertainment', amount: 80, date: '2024-01-12', description: 'Movie tickets' },
-        { id: 5, type: 'income', category: 'Freelance', amount: 500, date: '2024-01-08', description: 'Web design project' },
-        { id: 6, type: 'expense', category: 'Bills & Utilities', amount: 200, date: '2024-01-05', description: 'Electricity bill' },
-        { id: 7, type: 'expense', category: 'Shopping', amount: 150, date: '2024-01-14', description: 'Clothing' },
-        { id: 8, type: 'income', category: 'Investment', amount: 75, date: '2024-01-11', description: 'Dividend payment' }
-    ];
-
     useEffect(() => {
-        if (!authLoading) {
-            setTimeout(() => {
-                setTransactions(mockTransactions);
-                setFilteredTransactions(mockTransactions);
-                setDataLoading(false);
-            }, 600);
+        if (!authLoading && user) {
+            fetchUserTransactions();
         }
-    }, [authLoading]);
+    }, [authLoading, user]);
+
+    const fetchUserTransactions = async () => {
+        try {
+            setDataLoading(true);
+            const data = await getTransactions(user.email);
+            setTransactions(data);
+            setFilteredTransactions(data);
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            toast.error('Failed to load transactions');
+        } finally {
+            setDataLoading(false);
+        }
+    };
 
     useEffect(() => {
         let filtered = transactions;
@@ -69,32 +69,39 @@ const MyTransaction = () => {
         setFilteredTransactions(filtered);
     }, [transactions, filter, sortBy, searchTerm]);
 
-    const handleDeleteTransaction = (id) => {
-        toast((t) => (
-            <div className="flex flex-col gap-3">
-                <p className="font-medium">Delete this transaction?</p>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => {
-                            setTransactions(prev => prev.filter(t => t.id !== id));
-                            toast.success('Transaction deleted successfully!');
-                            toast.dismiss(t.id);
-                        }}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                        Delete
-                    </button>
-                    <button
-                        onClick={() => toast.dismiss(t.id)}
-                        className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        ), {
-            duration: 10000,
+    const handleDeleteTransaction = async (id) => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f97316',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
         });
+
+        if (result.isConfirmed) {
+            try {
+                await deleteTransaction(id);
+                setTransactions(prev => prev.filter(t => t._id !== id));
+                
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: 'Transaction has been deleted.',
+                    icon: 'success',
+                    confirmButtonColor: '#f97316'
+                });
+            } catch (error) {
+                console.error('Error deleting transaction:', error);
+                
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to delete transaction',
+                    icon: 'error',
+                    confirmButtonColor: '#f97316'
+                });
+            }
+        }
     };
 
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
@@ -204,7 +211,7 @@ const MyTransaction = () => {
                     ) : (
                         <div className="divide-y divide-gray-200 dark:divide-gray-700">
                             {filteredTransactions.map(transaction => (
-                                <div key={transaction.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <div key={transaction._id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                         <div className="flex-1">
                                             <div className="flex flex-wrap items-center gap-3 mb-3">
@@ -227,7 +234,7 @@ const MyTransaction = () => {
                                                 {transaction.type === 'income' ? '+' : '-'}${transaction.amount.toLocaleString()}
                                             </span>
                                             <button
-                                                onClick={() => handleDeleteTransaction(transaction.id)}
+                                                onClick={() => handleDeleteTransaction(transaction._id)}
                                                 className="text-red-500 hover:text-red-600 p-2 hover:bg-red-100 dark:hover:bg-red-900 rounded-lg transition-colors"
                                                 title="Delete transaction"
                                             >

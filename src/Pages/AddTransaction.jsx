@@ -1,26 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { FaDollarSign, FaCalendarAlt, FaTag, FaStickyNote, FaPlus } from 'react-icons/fa';
+import { FaDollarSign, FaCalendarAlt, FaTag, FaStickyNote, FaPlus, FaUtensils, FaCar, FaShoppingCart, FaGamepad, FaFileInvoiceDollar, FaEllipsisH, FaLaptop, FaChartLine, FaBriefcase } from 'react-icons/fa';
+import { getCategories, saveTransaction } from '../api/transactions';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../Firebase/firebase.init';
+import { useNavigate } from 'react-router';
+import Swal from 'sweetalert2';
 
 const AddTransaction = () => {
+    const [user] = useAuthState(auth);
+    const navigate = useNavigate();
     const [type, setType] = useState('expense');
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
         document.title = 'Add Transaction - Finance Management';
+        fetchCategories();
     }, []);
 
-    const handleSubmit = (e) => {
+    const fetchCategories = async () => {
+        try {
+            const data = await getCategories();
+            setCategories(data);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    };
+
+
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const form = e.target;
         const transaction = {
             type: form.type.value,
-            amount: form.amount.value,
+            amount: parseFloat(form.amount.value),
             category: form.category.value,
             description: form.description.value,
-            date: form.date.value
+            date: form.date.value,
+            email: user?.email ,
+            name: user?.displayName 
         };
-        console.log('Transaction:', transaction);
-        form.reset();
-        setType('expense');
+        
+        try {
+            const result = await saveTransaction(transaction);
+            console.log('Transaction saved:', result);
+            
+            const swalResult = await Swal.fire({
+                title: 'Success!',
+                text: 'Transaction added successfully!',
+                icon: 'success',
+                confirmButtonColor: '#f97316',
+                showCancelButton: true,
+                confirmButtonText: 'View Transactions',
+                cancelButtonText: 'Add Another'
+            });
+            
+            if (swalResult.isConfirmed) {
+                navigate('/transactions');
+            } else {
+                form.reset();
+                setType('expense');
+            }
+        } catch (error) {
+            console.error('Error saving transaction:', error);
+            
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to save transaction',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+        }
     };
 
     return (
@@ -92,23 +142,14 @@ const AddTransaction = () => {
                                 required
                             >
                                 <option value="">Select category</option>
-                                {type === 'income' ? (
-                                    <>
-                                        <option value="salary">Salary</option>
-                                        <option value="freelance">Freelance</option>
-                                        <option value="investment">Investment</option>
-                                        <option value="other">Other</option>
-                                    </>
-                                ) : (
-                                    <>
-                                        <option value="food">Food</option>
-                                        <option value="transport">Transport</option>
-                                        <option value="entertainment">Entertainment</option>
-                                        <option value="bills">Bills</option>
-                                        <option value="shopping">Shopping</option>
-                                        <option value="other">Other</option>
-                                    </>
-                                )}
+                                {categories
+                                    .filter(cat => cat.type === type)
+                                    .map(category => (
+                                        <option key={category._id} value={category.name.toLowerCase()}>
+                                            {category.name}
+                                        </option>
+                                    ))
+                                }
                             </select>
                         </div>
 
