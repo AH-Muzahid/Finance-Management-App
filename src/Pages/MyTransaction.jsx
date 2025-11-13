@@ -133,7 +133,7 @@ const MyTransaction = () => {
         if (user) {
             fetchUserTransactions();
         }
-    }, [sortBy, sortOrder, fetchUserTransactions]);
+    }, [sortBy, sortOrder, fetchUserTransactions, user]);
 
     const handleDeleteTransaction = async (id) => {
         const result = await Swal.fire({

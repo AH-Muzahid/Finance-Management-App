@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
 import { Link } from 'react-router';
@@ -13,18 +13,10 @@ const Home = () => {
     const [dataLoading, setDataLoading] = useState(true);
 
 
-    useEffect(() => {
-        if (!authLoading && user) {
-            fetchUserTransactions();
-        } else if (!authLoading && !user) {
-            setDataLoading(false);
-        }
-    }, [authLoading, user]);
-
-    const fetchUserTransactions = async () => {
+    const fetchUserTransactions = useCallback(async () => {
         try {
             setDataLoading(true);
-            const data = await getTransactions(user.email);
+            const data = await getTransactions(user?.email);
             setTransactions(data);
         } catch (error) {
             console.error('Error fetching transactions:', error);
@@ -32,7 +24,16 @@ const Home = () => {
         } finally {
             setDataLoading(false);
         }
-    };
+    }, [user?.email]);
+
+    useEffect(() => {
+        document.title = 'Home - Finance Management'
+        if (!authLoading && user) {
+            fetchUserTransactions();
+        } else if (!authLoading && !user) {
+            setDataLoading(false);
+        }
+    }, [authLoading, user, fetchUserTransactions]);
 
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
@@ -63,7 +64,7 @@ const Home = () => {
             {/* Hero Section */}
             <div className="bg-linear-to-br from-orange-400 via-orange-500 to-red-500 dark:bg-linear-to-br dark:from-orange-600 dark:via-orange-700 dark:to-red-700 py-20">
                 <div className="max-w-[1220px] mx-auto px-6 text-center">
-                    <h1 className="text-5xl font-bold text-white mb-6">Take Control of Your Finances</h1>
+                    <h1 className="text-5xl font-bold text-white mb-6">Take Control of Your Money</h1>
                     <p className="text-xl text-orange-100 mb-8 max-w-2xl mx-auto">Track, manage, and grow your wealth with FinEase - your personal finance companion</p>
                     <Link to="/add-transaction" className="bg-white text-orange-600 px-8 py-3 rounded-lg font-semibold hover:bg-orange-50 transition-colors shadow-lg">
                         Start Managing Your Money

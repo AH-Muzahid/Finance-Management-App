@@ -25,13 +25,13 @@ const Footer = () => {
                             <a href="https://www.facebook.com/ah.muzahid.2025/" className="text-white/60 hover:text-white transition-colors">
                                 <FaFacebook size={20} />
                             </a>
-                            <a href="#" className="text-white/60 hover:text-white transition-colors">
+                            <a href="https://x.com/AH_Muzahid" className="text-white/60 hover:text-white transition-colors">
                                 <FaXTwitter size={20} />
                             </a>
-                            <a href="#" className="text-white/60 hover:text-white transition-colors">
+                            <a href="https://www.instagram.com/ah_muzahid/" className="text-white/60 hover:text-white transition-colors">
                                 <FaInstagram size={20} />
                             </a>
-                            <a href="#" className="text-white/60 hover:text-white transition-colors">
+                            <a href="https://www.linkedin.com/in/ali-hasan-muzahid-34b612284/" className="text-white/60 hover:text-white transition-colors">
                                 <FaLinkedin size={20} />
                             </a>
                         </div>
@@ -43,7 +43,7 @@ const Footer = () => {
                         <div className="space-y-3">
                             <div className="flex items-center space-x-3">
                                 <FaEnvelope className="text-white" />
-                                <span className="text-white/80">support@finease.com</span>
+                                <span className="text-white/80">ahmuzahid40@gmail.com</span>
                             </div>
                             <div className="flex items-center space-x-3">
                                 <FaPhone className="text-white" />
@@ -79,7 +79,7 @@ const Footer = () => {
                 {/* Bottom Bar */}
                 <div className="border-t border-white/20 my-3 text-center">
                     <p className="text-sm text-white/70 pt-5">
-                        © 2024 FinEase. All rights reserved.
+                        © 2024 FinEase. All rights reserved. Created by Ali Hasan Muzahid.
                     </p>
                 </div>
             </div>

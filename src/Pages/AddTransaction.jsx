@@ -39,36 +39,6 @@ const AddTransaction = () => {
         }
     };
 
-    const resetCategories = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/api/reset-categories', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            const result = await response.json();
-            if (result.success) {
-                await fetchCategories();
-                Swal.fire({
-                    title: 'Success!',
-                    text: `Categories updated! ${result.insertedCount} categories loaded.`,
-                    icon: 'success',
-                    confirmButtonColor: '#f97316'
-                });
-            }
-        } catch (error) {
-            console.error('Error resetting categories:', error);
-            Swal.fire({
-                title: 'Error!',
-                text: 'Failed to update categories',
-                icon: 'error',
-                confirmButtonColor: '#f97316'
-            });
-        }
-    };
-
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -129,15 +99,7 @@ const AddTransaction = () => {
                             Add Transaction
                         </h1>
                         <p className="text-base-content/70">Track your income and expenses</p>
-                        {categories.length < 20 && (
-                            <button
-                                type="button"
-                                onClick={resetCategories}
-                                className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors"
-                            >
-                                Load More Categories
-                            </button>
-                        )}
+                       
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
