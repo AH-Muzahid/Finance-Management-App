@@ -122,6 +122,11 @@ MONGODB_URI=your_mongodb_connection_string
 - Intuitive dashboard
 - User-friendly forms
 
+### Data Export & Insights
+- Generate financial summaries
+- Budget tracking and alerts
+- Spending insights and recommendations
+
 ## 🔧 Available Scripts
 
 ### Frontend
