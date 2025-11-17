@@ -53,6 +53,11 @@ const MyTransaction = () => {
         if (!authLoading && user) {
             fetchUserTransactions();
             fetchCategories();
+        } else if (!authLoading && !user) {
+            // Clear transactions when user logs out
+            setTransactions([]);
+            setFilteredTransactions([]);
+            setDataLoading(false);
         }
     }, [authLoading, user, fetchUserTransactions, fetchCategories]);
 
@@ -190,12 +195,12 @@ const MyTransaction = () => {
     const handlePaidDecision = async (shouldDelete) => {
         try {
             const transaction = paidModal.transaction;
-            
+
             if (shouldDelete) {
                 // Delete the transaction
                 await deleteTransaction(transaction._id);
                 setTransactions(prev => prev.filter(t => t._id !== transaction._id));
-                
+
                 Swal.fire({
                     title: 'Deleted!',
                     text: `${transaction.type === 'receivable' ? 'Receivable' : 'Payable'} transaction has been deleted.`,
@@ -205,7 +210,7 @@ const MyTransaction = () => {
             } else {
                 // Convert to income/expense based on type
                 let updatedData = { ...transaction, isPaid: true };
-                
+
                 if (transaction.type === 'receivable') {
                     // Receivable paid = I received money = Income
                     updatedData.type = 'income';
@@ -213,18 +218,18 @@ const MyTransaction = () => {
                     // Payable paid = I gave money = Expense
                     updatedData.type = 'expense';
                 }
-                
+
                 await updateTransaction(transaction._id, updatedData);
-                
+
                 const updatedTransactions = transactions.map(t =>
                     t._id === transaction._id ? updatedData : t
                 );
                 setTransactions(updatedTransactions);
-                
-                const typeLabel = transaction.type === 'receivable' 
-                    ? 'Receivable converted to Income' 
+
+                const typeLabel = transaction.type === 'receivable'
+                    ? 'Receivable converted to Income'
                     : 'Payable converted to Expense';
-                
+
                 Swal.fire({
                     title: 'Payment Recorded!',
                     text: typeLabel,
@@ -232,11 +237,11 @@ const MyTransaction = () => {
                     confirmButtonColor: '#f97316'
                 });
             }
-            
+
             setPaidModal({ isOpen: false, transaction: null });
         } catch (error) {
             console.error('Error updating transaction status:', error);
-            
+
             Swal.fire({
                 title: 'Error!',
                 text: 'Failed to update transaction',
@@ -249,9 +254,9 @@ const MyTransaction = () => {
     const handleRevertPaidFromModal = async () => {
         try {
             const transaction = paidModal.transaction;
-            
+
             let updatedData = { ...transaction, isPaid: false };
-            
+
             // Convert back to receivable/payable based on current type
             if (transaction.type === 'income' && transaction.personName) {
                 // Income with personName = came from Receivable, so revert to Receivable
@@ -260,25 +265,25 @@ const MyTransaction = () => {
                 // Expense with personName = came from Payable, so revert to Payable
                 updatedData.type = 'payable';
             }
-            
+
             await updateTransaction(transaction._id, updatedData);
-            
+
             const updatedTransactions = transactions.map(t =>
                 t._id === transaction._id ? updatedData : t
             );
             setTransactions(updatedTransactions);
-            
+
             Swal.fire({
                 title: 'Reverted!',
                 text: 'Transaction marked as unpaid.',
                 icon: 'success',
                 confirmButtonColor: '#f97316'
             });
-            
+
             setPaidModal({ isOpen: false, transaction: null });
         } catch (error) {
             console.error('Error reverting paid status:', error);
-            
+
             Swal.fire({
                 title: 'Error!',
                 text: 'Failed to revert payment status',
@@ -514,11 +519,10 @@ const MyTransaction = () => {
                                         {(transaction.type === 'receivable' || transaction.type === 'payable') ? (
                                             <button
                                                 onClick={() => handleMarkAsPaid(transaction)}
-                                                className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm text-white ${
-                                                    transaction.isPaid
+                                                className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm text-white ${transaction.isPaid
                                                         ? 'bg-linear-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700'
                                                         : 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
-                                                }`}
+                                                    }`}
                                             >
                                                 {transaction.isPaid ? '✓ Paid' : 'Mark Paid'}
                                             </button>

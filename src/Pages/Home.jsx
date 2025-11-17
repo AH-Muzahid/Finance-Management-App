@@ -31,6 +31,8 @@ const Home = () => {
         if (!authLoading && user) {
             fetchUserTransactions();
         } else if (!authLoading && !user) {
+            // Clear transactions when user logs out
+            setTransactions([]);
             setDataLoading(false);
         }
     }, [authLoading, user, fetchUserTransactions]);
@@ -47,7 +49,7 @@ const Home = () => {
     // Today's data
     const today = new Date();
     const todayDateString = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-    
+
     const todayTransactions = transactions.filter(t => {
         const transactionDateString = new Date(t.date).toISOString().split('T')[0]; // Format: YYYY-MM-DD
         return transactionDateString === todayDateString;
@@ -200,8 +202,8 @@ const Home = () => {
 
                         {/* Today Net Balance */}
                         <div className={`bg-linear-to-br rounded-xl p-6 border ${todayBalance >= 0
-                                ? 'from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border-blue-200 dark:border-blue-700'
-                                : 'from-orange-50 to-orange-100 dark:from-orange-900 dark:to-orange-800 border-orange-200 dark:border-orange-700'
+                            ? 'from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 border-blue-200 dark:border-blue-700'
+                            : 'from-orange-50 to-orange-100 dark:from-orange-900 dark:to-orange-800 border-orange-200 dark:border-orange-700'
                             }`}>
                             <div className="flex items-center justify-between mb-4">
                                 <div className={`w-12 h-12 rounded-full flex items-center justify-center ${todayBalance >= 0 ? 'bg-blue-500' : 'bg-orange-500'
@@ -252,8 +254,8 @@ const Home = () => {
                                         <div key={transaction._id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                             <div className="flex items-center gap-3">
                                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${transaction.type === 'income'
-                                                        ? 'bg-green-100 dark:bg-green-900'
-                                                        : 'bg-red-100 dark:bg-red-900'
+                                                    ? 'bg-green-100 dark:bg-green-900'
+                                                    : 'bg-red-100 dark:bg-red-900'
                                                     }`}>
                                                     <FaDollarSign className={`text-sm ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                                                         }`} />
@@ -426,7 +428,7 @@ const Home = () => {
                 </div>
             </div>
 
-            {/* FAB Button */}
+            {/* FAB Button
             {user && (
                 <Link
                     to="/add-transaction"
@@ -434,7 +436,7 @@ const Home = () => {
                 >
                     <FaPlus className="text-xl" />
                 </Link>
-            )}
+            )} */}
         </div>
     );
 };

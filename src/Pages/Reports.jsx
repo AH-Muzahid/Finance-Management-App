@@ -168,6 +168,8 @@ const Reports = () => {
         if (!authLoading && user) {
             fetchUserTransactions();
         } else if (!authLoading && !user) {
+            // Clear transactions when user logs out
+            setTransactions([]);
             setDataLoading(false);
         }
     }, [authLoading, user, fetchUserTransactions]);
@@ -545,7 +547,7 @@ const Reports = () => {
                             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                                 <div
                                     className={`h-3 rounded-full transition-all duration-500 ${healthScore >= 80 ? 'bg-green-500' :
-                                            healthScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                                        healthScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                                         }`}
                                     style={{ width: `${healthScore}%` }}
                                 ></div>
@@ -645,8 +647,8 @@ const Reports = () => {
                                 <div
                                     key={index}
                                     className={`p-4 rounded-lg border-l-4 ${insight.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-500' :
-                                            insight.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500' :
-                                                'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
+                                        insight.type === 'warning' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500' :
+                                            'bg-blue-50 dark:bg-blue-900/20 border-blue-500'
                                         }`}
                                 >
                                     <p className="text-sm text-base-content">{insight.text}</p>
@@ -672,7 +674,7 @@ const Reports = () => {
                     </div>
                     <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 p-4 text-center">
                         <div className={`text-2xl font-bold mb-1 ${healthScore >= 80 ? 'text-green-500' :
-                                healthScore >= 60 ? 'text-yellow-500' : 'text-red-500'
+                            healthScore >= 60 ? 'text-yellow-500' : 'text-red-500'
                             }`}>{healthScore}/100</div>
                         <div className="text-sm text-base-content/70">Health Score</div>
                     </div>

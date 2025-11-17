@@ -19,14 +19,14 @@ const AddTransaction = () => {
     useEffect(() => {
         document.title = 'Add Transaction - Finance Management';
         fetchCategories();
-        
+
         // Close dropdown when clicking outside
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
             }
         };
-        
+
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
@@ -56,11 +56,11 @@ const AddTransaction = () => {
             // Add person name for receivable/payable
             ...(type === 'receivable' || type === 'payable' ? { personName: form.personName.value } : {})
         };
-        
+
         try {
             const result = await saveTransaction(transaction);
             console.log('Transaction saved:', result);
-            
+
             const swalResult = await Swal.fire({
                 title: 'Success!',
                 text: 'Transaction added successfully!',
@@ -70,7 +70,7 @@ const AddTransaction = () => {
                 confirmButtonText: 'View Transactions',
                 cancelButtonText: 'Add Another'
             });
-            
+
             if (swalResult.isConfirmed) {
                 navigate('/my-transactions');
             } else {
@@ -81,7 +81,7 @@ const AddTransaction = () => {
             }
         } catch (error) {
             console.error('Error saving transaction:', error);
-            
+
             Swal.fire({
                 title: 'Error!',
                 text: 'Failed to save transaction',
@@ -103,7 +103,7 @@ const AddTransaction = () => {
                             Add Transaction
                         </h1>
                         <p className="text-base-content/70">Track your income and expenses</p>
-                       
+
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -188,7 +188,7 @@ const AddTransaction = () => {
                             <div>
                                 <div className="mb-2">
                                     <span className="font-medium flex items-center gap-2 text-base-content">
-                                        <FaUser className="text-orange-500" /> 
+                                        <FaUser className="text-orange-500" />
                                         {type === 'receivable' ? 'Person Name (Who will pay you)' : 'Person Name (To whom you will pay)'}
                                     </span>
                                 </div>
@@ -209,7 +209,7 @@ const AddTransaction = () => {
                                 <span className="font-medium flex items-center gap-2 text-base-content"><FaTag className="text-orange-500" /> Category</span>
                             </div>
                             <input type="hidden" name="category" value={selectedCategory} required />
-                            <div 
+                            <div
                                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all cursor-pointer flex items-center justify-between"
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             >
@@ -264,7 +264,7 @@ const AddTransaction = () => {
                             />
                         </div>
 
-                        <div>
+                        {/* <div>
                             <div className="mb-2">
                                 <span className="font-medium flex items-center gap-2 text-base-content"><FaBriefcase className="text-orange-500" /> User Name</span>
                             </div>
@@ -274,9 +274,9 @@ const AddTransaction = () => {
                                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg cursor-not-allowed"
                                 readOnly
                             />
-                        </div>
+                        </div> */}
 
-                        <div>
+                        {/* <div>
                             <div className="mb-2">
                                 <span className="font-medium flex items-center gap-2 text-base-content"><FaFileInvoiceDollar className="text-orange-500" /> User Email</span>
                             </div>
@@ -286,7 +286,7 @@ const AddTransaction = () => {
                                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg cursor-not-allowed"
                                 readOnly
                             />
-                        </div>
+                        </div> */}
 
                         <button
                             type="submit"
@@ -294,14 +294,14 @@ const AddTransaction = () => {
                         >
                             <FaPlus /> Add Transaction
                         </button>
-
+{/* 
                         <button
                             type="button"
                             onClick={() => navigate('/my-transactions')}
                             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
                         >
                             📋 View Transactions
-                        </button>
+                        </button> */}
                     </form>
                 </div>
             </div>
