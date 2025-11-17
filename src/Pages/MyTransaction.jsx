@@ -19,9 +19,11 @@ const MyTransaction = () => {
     const [sortBy, setSortBy] = useState('date');
     const [sortOrder, setSortOrder] = useState('desc');
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedDate, setSelectedDate] = useState(''); // Date filter state
     const [editModal, setEditModal] = useState({ isOpen: false, transaction: null });
     const [categories, setCategories] = useState([]);
     const [editForm, setEditForm] = useState({});
+    const [paidModal, setPaidModal] = useState({ isOpen: false, transaction: null }); // Paid status modal
 
     const fetchUserTransactions = useCallback(async () => {
         try {
@@ -62,7 +64,8 @@ const MyTransaction = () => {
                 category: transaction.category,
                 amount: transaction.amount,
                 description: transaction.description,
-                date: transaction.date
+                date: transaction.date,
+                personName: transaction.personName || ''
             });
             setEditModal({ isOpen: true, transaction });
         }
@@ -74,7 +77,8 @@ const MyTransaction = () => {
             category: transaction.category,
             amount: transaction.amount,
             description: transaction.description,
-            date: transaction.date
+            date: transaction.date,
+            personName: transaction.personName || ''
         });
         setEditModal({ isOpen: true, transaction });
     };
@@ -82,14 +86,14 @@ const MyTransaction = () => {
     const handleEditSave = async () => {
         try {
             await updateTransaction(editModal.transaction._id, editForm);
-            
-            const updatedTransactions = transactions.map(t => 
+
+            const updatedTransactions = transactions.map(t =>
                 t._id === editModal.transaction._id ? { ...t, ...editForm } : t
             );
             setTransactions(updatedTransactions);
-            
+
             setEditModal({ isOpen: false, transaction: null });
-            
+
             Swal.fire({
                 title: 'Updated!',
                 text: 'Transaction has been updated.',
@@ -100,7 +104,7 @@ const MyTransaction = () => {
             });
         } catch (error) {
             console.error('Error updating transaction:', error);
-            
+
             Swal.fire({
                 title: 'Error!',
                 text: 'Failed to update transaction',
@@ -118,15 +122,24 @@ const MyTransaction = () => {
         }
 
         if (searchTerm) {
-            filtered = filtered.filter(t => 
+            filtered = filtered.filter(t =>
                 t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                t.category.toLowerCase().includes(searchTerm.toLowerCase())
+                t.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (t.personName && t.personName.toLowerCase().includes(searchTerm.toLowerCase()))
             );
+        }
+
+        // Date filter
+        if (selectedDate) {
+            filtered = filtered.filter(t => {
+                const transactionDate = new Date(t.date).toISOString().split('T')[0];
+                return transactionDate === selectedDate;
+            });
         }
 
         // Backend sorting is already applied, no need to sort again
         setFilteredTransactions(filtered);
-    }, [transactions, filter, searchTerm]);
+    }, [transactions, filter, searchTerm, selectedDate]);
 
     // Refetch data when sort changes
     useEffect(() => {
@@ -150,7 +163,7 @@ const MyTransaction = () => {
             try {
                 await deleteTransaction(id);
                 setTransactions(prev => prev.filter(t => t._id !== id));
-                
+
                 Swal.fire({
                     title: 'Deleted!',
                     text: 'Transaction has been deleted.',
@@ -159,7 +172,7 @@ const MyTransaction = () => {
                 });
             } catch (error) {
                 console.error('Error deleting transaction:', error);
-                
+
                 Swal.fire({
                     title: 'Error!',
                     text: 'Failed to delete transaction',
@@ -170,8 +183,115 @@ const MyTransaction = () => {
         }
     };
 
+    const handleMarkAsPaid = (transaction) => {
+        setPaidModal({ isOpen: true, transaction });
+    };
+
+    const handlePaidDecision = async (shouldDelete) => {
+        try {
+            const transaction = paidModal.transaction;
+            
+            if (shouldDelete) {
+                // Delete the transaction
+                await deleteTransaction(transaction._id);
+                setTransactions(prev => prev.filter(t => t._id !== transaction._id));
+                
+                Swal.fire({
+                    title: 'Deleted!',
+                    text: `${transaction.type === 'receivable' ? 'Receivable' : 'Payable'} transaction has been deleted.`,
+                    icon: 'success',
+                    confirmButtonColor: '#f97316'
+                });
+            } else {
+                // Convert to income/expense based on type
+                let updatedData = { ...transaction, isPaid: true };
+                
+                if (transaction.type === 'receivable') {
+                    // Receivable paid = I received money = Income
+                    updatedData.type = 'income';
+                } else if (transaction.type === 'payable') {
+                    // Payable paid = I gave money = Expense
+                    updatedData.type = 'expense';
+                }
+                
+                await updateTransaction(transaction._id, updatedData);
+                
+                const updatedTransactions = transactions.map(t =>
+                    t._id === transaction._id ? updatedData : t
+                );
+                setTransactions(updatedTransactions);
+                
+                const typeLabel = transaction.type === 'receivable' 
+                    ? 'Receivable converted to Income' 
+                    : 'Payable converted to Expense';
+                
+                Swal.fire({
+                    title: 'Payment Recorded!',
+                    text: typeLabel,
+                    icon: 'success',
+                    confirmButtonColor: '#f97316'
+                });
+            }
+            
+            setPaidModal({ isOpen: false, transaction: null });
+        } catch (error) {
+            console.error('Error updating transaction status:', error);
+            
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to update transaction',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+        }
+    };
+
+    const handleRevertPaidFromModal = async () => {
+        try {
+            const transaction = paidModal.transaction;
+            
+            let updatedData = { ...transaction, isPaid: false };
+            
+            // Convert back to receivable/payable based on current type
+            if (transaction.type === 'income' && transaction.personName) {
+                // Income with personName = came from Receivable, so revert to Receivable
+                updatedData.type = 'receivable';
+            } else if (transaction.type === 'expense' && transaction.personName) {
+                // Expense with personName = came from Payable, so revert to Payable
+                updatedData.type = 'payable';
+            }
+            
+            await updateTransaction(transaction._id, updatedData);
+            
+            const updatedTransactions = transactions.map(t =>
+                t._id === transaction._id ? updatedData : t
+            );
+            setTransactions(updatedTransactions);
+            
+            Swal.fire({
+                title: 'Reverted!',
+                text: 'Transaction marked as unpaid.',
+                icon: 'success',
+                confirmButtonColor: '#f97316'
+            });
+            
+            setPaidModal({ isOpen: false, transaction: null });
+        } catch (error) {
+            console.error('Error reverting paid status:', error);
+            
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to revert payment status',
+                icon: 'error',
+                confirmButtonColor: '#f97316'
+            });
+        }
+    };
+
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    const totalReceivable = transactions.filter(t => t.type === 'receivable').reduce((sum, t) => sum + t.amount, 0);
+    const totalPayable = transactions.filter(t => t.type === 'payable').reduce((sum, t) => sum + t.amount, 0);
     const balance = totalIncome - totalExpenses;
 
     if (authLoading || dataLoading) {
@@ -187,7 +307,7 @@ const MyTransaction = () => {
                         <h1 className="text-3xl font-bold text-base-content mb-2">My Transactions</h1>
                         <p className="text-base-content/70">Manage your financial transactions</p>
                     </div>
-                    <Link 
+                    <Link
                         to="/add-transaction"
                         className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
                     >
@@ -196,24 +316,32 @@ const MyTransaction = () => {
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
                     <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
-                        <h3 className="text-lg font-semibold text-base-content mb-3">Total Income</h3>
-                        <p className="text-3xl font-bold text-green-600">BDT {totalIncome.toLocaleString()}</p>
+                        <h3 className="text-base font-semibold text-base-content mb-2">Total Income</h3>
+                        <p className="text-2xl font-bold text-green-600">BDT {totalIncome.toLocaleString()}</p>
                     </div>
                     <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
-                        <h3 className="text-lg font-semibold text-base-content mb-3">Total Expenses</h3>
-                        <p className="text-3xl font-bold text-red-600">BDT {totalExpenses.toLocaleString()}</p>
+                        <h3 className="text-base font-semibold text-base-content mb-2">Total Expenses</h3>
+                        <p className="text-2xl font-bold text-red-600">BDT {totalExpenses.toLocaleString()}</p>
                     </div>
                     <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
-                        <h3 className="text-lg font-semibold text-base-content mb-3">Net Balance</h3>
-                        <p className={`text-3xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>BDT {balance.toLocaleString()}</p>
+                        <h3 className="text-base font-semibold text-base-content mb-2">Receivable</h3>
+                        <p className="text-2xl font-bold text-blue-600">BDT {totalReceivable.toLocaleString()}</p>
+                    </div>
+                    <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
+                        <h3 className="text-base font-semibold text-base-content mb-2">Payable</h3>
+                        <p className="text-2xl font-bold text-orange-600">BDT {totalPayable.toLocaleString()}</p>
+                    </div>
+                    <div className="bg-white dark:bg-base-200 rounded-xl p-6 text-center shadow-lg border border-gray-100 dark:border-base-300">
+                        <h3 className="text-base font-semibold text-base-content mb-2">Net Balance</h3>
+                        <p className={`text-2xl font-bold ${balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>BDT {balance.toLocaleString()}</p>
                     </div>
                 </div>
 
                 {/* Filters and Search */}
                 <div className="bg-white dark:bg-base-200 rounded-xl p-6 mb-8 shadow-lg border border-gray-100 dark:border-base-300">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-base-content mb-2">Search</label>
                             <input
@@ -235,7 +363,19 @@ const MyTransaction = () => {
                                 <option value="all">All Transactions</option>
                                 <option value="income">Income Only</option>
                                 <option value="expense">Expenses Only</option>
+                                <option value="receivable">Receivable Only</option>
+                                <option value="payable">Payable Only</option>
                             </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-base-content mb-2">Filter by Date</label>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
+                            />
                         </div>
 
                         <div>
@@ -262,8 +402,8 @@ const MyTransaction = () => {
                                     </select>
                                 </div>
                                 <div className="flex items-center px-2">
-                                    {sortOrder === 'desc' ? 
-                                        <FaSortAmountDown className="text-orange-500" /> : 
+                                    {sortOrder === 'desc' ?
+                                        <FaSortAmountDown className="text-orange-500" /> :
                                         <FaSortAmountUp className="text-orange-500" />
                                     }
                                 </div>
@@ -277,11 +417,11 @@ const MyTransaction = () => {
                     <h3 className="text-xl font-semibold text-base-content mb-6">
                         Transactions ({filteredTransactions.length})
                     </h3>
-                    
+
                     {filteredTransactions.length === 0 ? (
                         <div className="bg-white dark:bg-base-200 rounded-xl p-8 text-center shadow-lg border border-gray-100 dark:border-base-300">
                             <p className="text-base-content/70 mb-4">No transactions found</p>
-                            <Link 
+                            <Link
                                 to="/add-transaction"
                                 className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors inline-block"
                             >
@@ -294,24 +434,33 @@ const MyTransaction = () => {
                                 <div key={transaction._id} className="bg-white dark:bg-base-200 rounded-2xl p-6 shadow-md hover:shadow-xl border border-gray-100 dark:border-base-300 transition-all duration-300 hover:scale-[1.02]">
                                     {/* Header with Amount and Type */}
                                     <div className="flex justify-between items-center mb-4">
-                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                                            transaction.type === 'income' 
-                                                ? 'bg-green-100 dark:bg-green-900' 
-                                                : 'bg-red-100 dark:bg-red-900'
-                                        }`}>
-                                            <FaDollarSign className={`text-lg ${
-                                                transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                                            }`} />
+                                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${transaction.type === 'income'
+                                            ? 'bg-green-100 dark:bg-green-900'
+                                            : transaction.type === 'expense'
+                                                ? 'bg-red-100 dark:bg-red-900'
+                                                : transaction.type === 'receivable'
+                                                    ? 'bg-blue-100 dark:bg-blue-900'
+                                                    : 'bg-orange-100 dark:bg-orange-900'
+                                            }`}>
+                                            <FaDollarSign className={`text-lg ${transaction.type === 'income' ? 'text-green-600'
+                                                : transaction.type === 'expense' ? 'text-red-600'
+                                                    : transaction.type === 'receivable' ? 'text-blue-600'
+                                                        : 'text-orange-600'
+                                                }`} />
                                         </div>
                                         <div className="text-right">
-                                            <span className={`text-2xl font-bold ${
-                                                transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                                            }`}>
-                                                {transaction.type === 'income' ? '+' : '-'}BDT {transaction.amount.toLocaleString()}
+                                            <span className={`text-2xl font-bold ${transaction.type === 'income' ? 'text-green-600'
+                                                : transaction.type === 'expense' ? 'text-red-600'
+                                                    : transaction.type === 'receivable' ? 'text-blue-600'
+                                                        : 'text-orange-600'
+                                                }`}>
+                                                {transaction.type === 'income' || transaction.type === 'receivable' ? '+' : '-'}BDT {transaction.amount.toLocaleString()}
                                             </span>
-                                            <p className={`text-xs font-medium uppercase tracking-wide ${
-                                                transaction.type === 'income' ? 'text-green-500' : 'text-red-500'
-                                            }`}>
+                                            <p className={`text-xs font-medium uppercase tracking-wide ${transaction.type === 'income' ? 'text-green-500'
+                                                : transaction.type === 'expense' ? 'text-red-500'
+                                                    : transaction.type === 'receivable' ? 'text-blue-500'
+                                                        : 'text-orange-500'
+                                                }`}>
                                                 {transaction.type}
                                             </p>
                                         </div>
@@ -324,7 +473,17 @@ const MyTransaction = () => {
                                                 {transaction.description}
                                             </h3>
                                         </div>
-                                        
+
+                                        {(transaction.type === 'receivable' || transaction.type === 'payable') && transaction.personName && (
+                                            <div className="flex items-center gap-2 text-sm text-base-content/70">
+                                                <FaTag className="text-orange-500" />
+                                                <span className="font-medium">
+                                                    {transaction.type === 'receivable' ? 'From: ' : 'To: '}
+                                                    {transaction.personName}
+                                                </span>
+                                            </div>
+                                        )}
+
                                         <div className="flex items-center justify-between text-sm text-base-content/70">
                                             <div className="flex items-center gap-2">
                                                 <FaTag className="text-orange-500" />
@@ -352,12 +511,25 @@ const MyTransaction = () => {
                                         >
                                             <FaEdit className="text-xs" /> Edit
                                         </button>
-                                        <button
-                                            onClick={() => handleDeleteTransaction(transaction._id)}
-                                            className="flex-1 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm"
-                                        >
-                                            <FaTrash className="text-xs" /> Delete
-                                        </button>
+                                        {(transaction.type === 'receivable' || transaction.type === 'payable') ? (
+                                            <button
+                                                onClick={() => handleMarkAsPaid(transaction)}
+                                                className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm text-white ${
+                                                    transaction.isPaid
+                                                        ? 'bg-linear-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700'
+                                                        : 'bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                                                }`}
+                                            >
+                                                {transaction.isPaid ? '✓ Paid' : 'Mark Paid'}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleDeleteTransaction(transaction._id)}
+                                                className="flex-1 bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm"
+                                            >
+                                                <FaTrash className="text-xs" /> Delete
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -382,7 +554,7 @@ const MyTransaction = () => {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-base-content mb-2">Type</label>
-                                    <div className="flex gap-4">
+                                    <div className="grid grid-cols-2 gap-2">
                                         <label className="flex items-center gap-2">
                                             <input
                                                 type="radio"
@@ -392,7 +564,7 @@ const MyTransaction = () => {
                                                 onChange={(e) => setEditForm(prev => ({ ...prev, type: e.target.value }))}
                                                 className="radio radio-error"
                                             />
-                                            <span className="text-red-600">Expense</span>
+                                            <span className="text-red-600 text-sm">Expense</span>
                                         </label>
                                         <label className="flex items-center gap-2">
                                             <input
@@ -403,7 +575,29 @@ const MyTransaction = () => {
                                                 onChange={(e) => setEditForm(prev => ({ ...prev, type: e.target.value }))}
                                                 className="radio radio-success"
                                             />
-                                            <span className="text-green-600">Income</span>
+                                            <span className="text-green-600 text-sm">Income</span>
+                                        </label>
+                                        <label className="flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="editType"
+                                                value="receivable"
+                                                checked={editForm.type === 'receivable'}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, type: e.target.value }))}
+                                                className="radio radio-info"
+                                            />
+                                            <span className="text-blue-600 text-sm">Receivable</span>
+                                        </label>
+                                        <label className="flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="editType"
+                                                value="payable"
+                                                checked={editForm.type === 'payable'}
+                                                onChange={(e) => setEditForm(prev => ({ ...prev, type: e.target.value }))}
+                                                className="radio radio-warning"
+                                            />
+                                            <span className="text-orange-600 text-sm">Payable</span>
                                         </label>
                                     </div>
                                 </div>
@@ -417,6 +611,21 @@ const MyTransaction = () => {
                                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none"
                                     />
                                 </div>
+
+                                {(editForm.type === 'receivable' || editForm.type === 'payable') && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-base-content mb-2">
+                                            {editForm.type === 'receivable' ? 'Person Name (Who will pay)' : 'Person Name (To whom you will pay)'}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editForm.personName || ''}
+                                            onChange={(e) => setEditForm(prev => ({ ...prev, personName: e.target.value }))}
+                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none"
+                                            placeholder={editForm.type === 'receivable' ? 'Enter debtor name' : 'Enter creditor name'}
+                                        />
+                                    </div>
+                                )}
 
                                 <div>
                                     <label className="block text-sm font-medium text-base-content mb-2">Category</label>
@@ -471,6 +680,94 @@ const MyTransaction = () => {
                                     </button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Paid Status Modal */}
+                {paidModal.isOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white dark:bg-base-200 rounded-xl p-6 w-full max-w-md">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-xl font-bold text-base-content">Mark as Paid</h3>
+                                <button
+                                    onClick={() => setPaidModal({ isOpen: false, transaction: null })}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    <FaTimes />
+                                </button>
+                            </div>
+
+                            <div className="mb-6">
+                                <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-4">
+                                    <p className="text-sm text-base-content/70 mb-2">Transaction Details:</p>
+                                    <p className="text-lg font-bold text-base-content mb-2">{paidModal.transaction?.description}</p>
+                                    <p className={`text-2xl font-bold ${paidModal.transaction?.type === 'receivable' ? 'text-blue-600' : 'text-orange-600'}`}>
+                                        BDT {paidModal.transaction?.amount.toLocaleString()}
+                                    </p>
+                                    <p className="text-xs text-base-content/60 mt-2">
+                                        {paidModal.transaction?.type === 'receivable' ? 'From: ' : 'To: '}{paidModal.transaction?.personName}
+                                    </p>
+                                    {paidModal.transaction?.isPaid && (
+                                        <p className="text-xs text-green-600 mt-3 font-semibold">✓ Status: PAID</p>
+                                    )}
+                                </div>
+
+                                <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 p-4 rounded-lg">
+                                    <p className="text-sm text-base-content mb-2">What would you like to do?</p>
+                                    <ul className="text-sm text-base-content/70 space-y-1">
+                                        {paidModal.transaction?.isPaid ? (
+                                            <li>• <strong>Revert:</strong> Mark as unpaid and keep in records</li>
+                                        ) : (
+                                            <>
+                                                <li>• <strong>Keep:</strong> Convert {paidModal.transaction?.type === 'receivable' ? 'to Income' : 'to Expense'} and keep in records</li>
+                                                <li>• <strong>Delete:</strong> Convert and remove from history</li>
+                                            </>
+                                        )}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3">
+                                {paidModal.transaction?.isPaid ? (
+                                    <>
+                                        <button
+                                            onClick={() => handleRevertPaidFromModal()}
+                                            className="flex-1 bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors"
+                                        >
+                                            ↺ Revert to Unpaid
+                                        </button>
+                                        <button
+                                            onClick={() => handlePaidDecision(true)}
+                                            className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors"
+                                        >
+                                            Delete
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => handlePaidDecision(false)}
+                                            className="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors"
+                                        >
+                                            Convert & Keep
+                                        </button>
+                                        <button
+                                            onClick={() => handlePaidDecision(true)}
+                                            className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded-lg font-semibold transition-colors"
+                                        >
+                                            Convert & Delete
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+
+                            <button
+                                onClick={() => setPaidModal({ isOpen: false, transaction: null })}
+                                className="w-full mt-3 bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>
                 )}

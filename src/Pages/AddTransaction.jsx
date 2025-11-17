@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaDollarSign, FaCalendarAlt, FaTag, FaStickyNote, FaPlus, FaUtensils, FaCar, FaShoppingCart, FaGamepad, FaFileInvoiceDollar, FaEllipsisH, FaLaptop, FaChartLine, FaBriefcase, FaChevronDown } from 'react-icons/fa';
+import { FaDollarSign, FaCalendarAlt, FaTag, FaStickyNote, FaPlus, FaUtensils, FaCar, FaShoppingCart, FaGamepad, FaFileInvoiceDollar, FaEllipsisH, FaLaptop, FaChartLine, FaBriefcase, FaChevronDown, FaUser } from 'react-icons/fa';
 import { getCategories, saveTransaction } from '../api/transactions';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
@@ -13,6 +13,7 @@ const AddTransaction = () => {
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [personName, setPersonName] = useState('');
     const dropdownRef = useRef(null);
 
     useEffect(() => {
@@ -51,7 +52,9 @@ const AddTransaction = () => {
             date: form.date.value,
             email: user?.email,
             name: user?.displayName,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            // Add person name for receivable/payable
+            ...(type === 'receivable' || type === 'payable' ? { personName: form.personName.value } : {})
         };
         
         try {
@@ -74,6 +77,7 @@ const AddTransaction = () => {
                 form.reset();
                 setType('expense');
                 setSelectedCategory('');
+                setPersonName('');
             }
         } catch (error) {
             console.error('Error saving transaction:', error);
@@ -107,14 +111,17 @@ const AddTransaction = () => {
                             <div className="mb-2">
                                 <span className="font-medium flex items-center gap-2 text-base-content">Type</span>
                             </div>
-                            <div className="flex gap-4">
+                            <div className="grid grid-cols-2 gap-3">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="radio"
                                         name="type"
                                         value="expense"
                                         checked={type === 'expense'}
-                                        onChange={(e) => setType(e.target.value)}
+                                        onChange={(e) => {
+                                            setType(e.target.value);
+                                            setSelectedCategory('');
+                                        }}
                                         className="radio radio-error"
                                     />
                                     <span className="text-red-600">Expense</span>
@@ -125,12 +132,42 @@ const AddTransaction = () => {
                                         name="type"
                                         value="income"
                                         checked={type === 'income'}
-                                        onChange={(e) => setType(e.target.value)}
+                                        onChange={(e) => {
+                                            setType(e.target.value);
+                                            setSelectedCategory('');
+                                        }}
                                         className="radio radio-success"
                                     />
                                     <span className="text-green-600">Income</span>
                                 </label>
-
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="type"
+                                        value="receivable"
+                                        checked={type === 'receivable'}
+                                        onChange={(e) => {
+                                            setType(e.target.value);
+                                            setSelectedCategory('');
+                                        }}
+                                        className="radio radio-info"
+                                    />
+                                    <span className="text-blue-600">Receivable</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="type"
+                                        value="payable"
+                                        checked={type === 'payable'}
+                                        onChange={(e) => {
+                                            setType(e.target.value);
+                                            setSelectedCategory('');
+                                        }}
+                                        className="radio radio-warning"
+                                    />
+                                    <span className="text-orange-600">Payable</span>
+                                </label>
                             </div>
                         </div>
 
@@ -146,6 +183,26 @@ const AddTransaction = () => {
                                 required
                             />
                         </div>
+
+                        {(type === 'receivable' || type === 'payable') && (
+                            <div>
+                                <div className="mb-2">
+                                    <span className="font-medium flex items-center gap-2 text-base-content">
+                                        <FaUser className="text-orange-500" /> 
+                                        {type === 'receivable' ? 'Person Name (Who will pay you)' : 'Person Name (To whom you will pay)'}
+                                    </span>
+                                </div>
+                                <input
+                                    type="text"
+                                    name="personName"
+                                    value={personName}
+                                    onChange={(e) => setPersonName(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
+                                    placeholder={type === 'receivable' ? 'Enter debtor name' : 'Enter creditor name'}
+                                    required
+                                />
+                            </div>
+                        )}
 
                         <div className="relative" ref={dropdownRef}>
                             <div className="mb-2">
@@ -236,6 +293,14 @@ const AddTransaction = () => {
                             className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
                         >
                             <FaPlus /> Add Transaction
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate('/my-transactions')}
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                        >
+                            📋 View Transactions
                         </button>
                     </form>
                 </div>

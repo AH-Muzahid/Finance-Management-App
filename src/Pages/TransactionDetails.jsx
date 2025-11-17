@@ -22,11 +22,11 @@ const TransactionDetails = () => {
             const data = await getTransaction(id);
             console.log('Transaction data received:', data);
             setTransaction(data);
-            
+
             // Calculate category total
             if (user && data) {
                 const allTransactions = await getTransactions(user.email);
-                const categoryTransactions = allTransactions.filter(t => 
+                const categoryTransactions = allTransactions.filter(t =>
                     t.category === data.category && t.type === data.type
                 );
                 const total = categoryTransactions.reduce((sum, t) => sum + t.amount, 0);
@@ -66,18 +66,18 @@ const TransactionDetails = () => {
         if (result.isConfirmed) {
             try {
                 await deleteTransaction(id);
-                
+
                 Swal.fire({
                     title: 'Deleted!',
                     text: 'Transaction has been deleted.',
                     icon: 'success',
                     confirmButtonColor: '#f97316'
                 });
-                
+
                 navigate('/my-transactions');
             } catch (error) {
                 console.error('Error deleting transaction:', error);
-                
+
                 Swal.fire({
                     title: 'Error!',
                     text: 'Failed to delete transaction',
@@ -97,7 +97,7 @@ const TransactionDetails = () => {
             <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 p-4 flex items-center justify-center">
                 <div className="text-center">
                     <h2 className="text-2xl font-bold text-base-content mb-4">Transaction Not Found</h2>
-                    <Link 
+                    <Link
                         to="/my-transactions"
                         className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
                     >
@@ -113,7 +113,7 @@ const TransactionDetails = () => {
             <div className="max-w-2xl mx-auto">
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
-                    <Link 
+                    <Link
                         to="/my-transactions"
                         className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
                     >
@@ -129,24 +129,43 @@ const TransactionDetails = () => {
                 <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 p-8">
                     {/* Type and Amount */}
                     <div className="flex justify-between items-start mb-8">
-                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                            transaction.type === 'income' 
-                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                        }`}>
+                        <span className={`px-4 py-2 rounded-full text-sm font-semibold ${transaction.type === 'income'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            : transaction.type === 'expense'
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                : transaction.type === 'receivable'
+                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                    : 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                            }`}>
                             {transaction.type.toUpperCase()}
                         </span>
                         <div className="text-right">
-                            <span className={`text-4xl font-bold ${
-                                transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                            }`}>
-                                {transaction.type === 'income' ? '+' : '-'}BDT {transaction.amount.toLocaleString()}
+                            <span className={`text-4xl font-bold ${transaction.type === 'income' ? 'text-green-600'
+                                : transaction.type === 'expense' ? 'text-red-600'
+                                    : transaction.type === 'receivable' ? 'text-blue-600'
+                                        : 'text-orange-600'
+                                }`}>
+                                {transaction.type === 'income' || transaction.type === 'receivable' ? '+' : '-'}BDT {transaction.amount.toLocaleString()}
                             </span>
                         </div>
                     </div>
 
                     {/* Transaction Details */}
                     <div className="space-y-6 mb-8">
+                        {(transaction.type === 'receivable' || transaction.type === 'payable') && transaction.personName && (
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
+                                    <FaDollarSign className="text-orange-500 text-xl" />
+                                </div>
+                                <div>
+                                    <p className="text-sm text-base-content/70">
+                                        {transaction.type === 'receivable' ? 'Will Receive From' : 'Will Pay To'}
+                                    </p>
+                                    <p className="text-lg font-semibold text-base-content">{transaction.personName}</p>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
                                 <FaTag className="text-orange-500 text-xl" />
