@@ -45,9 +45,7 @@ const Navbar = () => {
         { name: 'Home', path: '/', public: true },
         { name: 'About', path: '/about', public: true },
         { name: 'Contact', path: '/contact', public: true },
-        { name: 'Add Transaction', path: '/add-transaction', public: false },
-        { name: 'My Transactions', path: '/my-transactions', public: false },
-        { name: 'Reports', path: '/reports', public: false }
+        { name: 'Dashboard', path: '/dashboard/add-transaction', public: false }
     ];
 
     return (
@@ -122,102 +120,6 @@ const Navbar = () => {
                             <Link to="/register" className="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg font-semibold transition-colors hidden sm:inline-block">Sign Up</Link>
                         </div>
                     )}
-                </div>
-            </div>
-
-            {/* Mobile Bottom Navigation - Custom Dock */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
-                <div
-                    className=" m-2 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-2xl shadow-2xl dark:shadow-2xl transition-colors duration-300"
-                    style={{
-                        backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
-                    }}
-                >
-                    <div className="flex justify-around items-center px-2 py-3 ">
-                        {user ? (
-                            <>
-                                <Link
-                                    to="/"
-                                    className={`flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-300 font-medium ${location.pathname === '/'
-                                        ? 'bg-linear-to-br from-orange-400 to-orange-500 text-white shadow-lg shadow-orange-200 dark:shadow-orange-900/50 scale-110'
-                                        : 'text-black dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 active:scale-95'
-                                        }`}
-                                    title="Home"
-                                >
-                                    <FaHome className="text-xl mb-1" />
-                                </Link>
-                                <Link
-                                    to="/add-transaction"
-                                    className={`flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-300 font-medium ${location.pathname === '/add-transaction'
-                                        ? 'bg-linear-to-br from-orange-400 to-orange-500 text-white shadow-lg shadow-orange-200 dark:shadow-orange-900/50 scale-110'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 scale-95'
-                                        }`}
-                                    title="Add Transaction"
-                                >
-                                    <FaPlus className="text-xl mb-1" />
-                                    {/* <span className="text-xs font-semibold">Add</span> */}
-                                </Link>
-                                <Link
-                                    to="/my-transactions"
-                                    className={`flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-300 font-medium ${location.pathname === '/my-transactions'
-                                        ? 'bg-linear-to-br from-orange-400 to-orange-500 text-white shadow-lg shadow-orange-200 dark:shadow-orange-900/50 scale-110'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 active:scale-95'
-                                        }`}
-                                    title="My Transactions"
-                                >
-                                    <FaList className="text-xl mb-1" />
-                                    {/* <span className="text-xs font-semibold">Trans</span> */}
-                                </Link>
-                                <Link
-                                    to="/reports"
-                                    className={`flex flex-col items-center justify-center py-2 px-3 rounded-2xl transition-all duration-300 font-medium ${location.pathname === '/reports'
-                                        ? 'bg-linear-to-br from-orange-400 to-orange-500 text-white shadow-lg shadow-orange-200 dark:shadow-orange-900/50 scale-110'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 active:scale-95'
-                                        }`}
-                                    title="Reports"
-                                >
-                                    <FaChartBar className="text-xl mb-1" />
-                                    {/* <span className="text-xs font-semibold">Report</span> */}
-                                </Link>
-                            </>
-                        ) : (
-                            <>
-                                <Link
-                                    to="/"
-                                    className={`flex flex-col items-center justify-center py-3 px-3 rounded-2xl transition-all duration-300 font-medium ${location.pathname === '/'
-                                        ? 'bg-linear-to-br from-orange-400 to-orange-500 text-white shadow-lg shadow-orange-200 dark:shadow-orange-900/50 scale-110'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 active:scale-95'
-                                        }`}
-                                    title="Home"
-                                >
-                                    <FaHome className="text-xl mb-1" />
-                                    <span className="text-xs font-semibold">Home</span>
-                                </Link>
-                                <Link
-                                    to="/login"
-                                    className={`flex flex-col items-center justify-center py-3 px-3 rounded-2xl transition-all duration-300 font-medium ${location.pathname === '/login'
-                                        ? 'bg-linear-to-br from-orange-400 to-orange-500 text-white shadow-lg shadow-orange-200 dark:shadow-orange-900/50 scale-110'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 active:scale-95'
-                                        }`}
-                                    title="Login"
-                                >
-                                    <FaUser className="text-xl mb-1" />
-                                    <span className="text-xs font-semibold">Login</span>
-                                </Link>
-                                <Link
-                                    to="/register"
-                                    className={`flex flex-col items-center justify-center py-3 px-3 rounded-2xl transition-all duration-300 font-medium ${location.pathname === '/register'
-                                        ? 'bg-linear-to-br from-orange-400 to-orange-500 text-white shadow-lg shadow-orange-200 dark:shadow-orange-900/50 scale-110'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 active:scale-95'
-                                        }`}
-                                    title="Sign Up"
-                                >
-                                    <FaPlus className="text-xl mb-1" />
-                                    <span className="text-xs font-semibold">Sign Up</span>
-                                </Link>
-                            </>
-                        )}
-                    </div>
                 </div>
             </div>
         </>

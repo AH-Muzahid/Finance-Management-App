@@ -5,13 +5,11 @@ import './index.css'
 import { Toaster } from 'react-hot-toast';
 
 import Root from './Layout/Root';
+import DashboardLayout from './Layout/DashboardLayout';
 import PrivateRoute from './Components/PrivateRoute';
 import ReportsSkeleton from './Components/ReportsSkeleton';
 import MyTransactionSkeleton from './Components/MyTransactionSkeleton';
 
-// Lazy load pages
-// Lazy load pages
-// Lazy load pages
 // Lazy load pages
 const Profile = React.lazy(() => import('./Pages/Profile'));
 // Eager load Home to avoid double skeleton
@@ -50,48 +48,6 @@ const router = createBrowserRouter([
         Component: ForgetPass,
       },
       {
-        path: "/profile",
-        element: (
-          <PrivateRoute>
-            <Profile />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "/update-profile",
-        element: (
-          <PrivateRoute>
-            <UpdateProfile />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "/add-transaction",
-        element: (
-          <PrivateRoute>
-            <AddTransaction />
-          </PrivateRoute>
-        ),
-      },
-      {
-        path: "/my-transactions",
-        element: (
-          <Suspense fallback={<MyTransactionSkeleton />}>
-            <PrivateRoute skeleton={<MyTransactionSkeleton />}>
-              <MyTransaction />
-            </PrivateRoute>
-          </Suspense>
-        ),
-      },
-      {
-        path: "/transaction/:id",
-        element: (
-          <PrivateRoute>
-            <TransactionDetails />
-          </PrivateRoute>
-        ),
-      },
-      {
         path: "/about",
         Component: About,
       },
@@ -99,13 +55,46 @@ const router = createBrowserRouter([
         path: "/contact",
         Component: Contact,
       },
+    ]
+  },
+  // Dashboard routes with sidebar
+  {
+    path: "/dashboard",
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
+    children: [
       {
-        path: "/reports",
+        path: "profile",
+        Component: Profile,
+      },
+      {
+        path: "update-profile",
+        Component: UpdateProfile,
+      },
+      {
+        path: "add-transaction",
+        Component: AddTransaction,
+      },
+      {
+        path: "my-transactions",
+        element: (
+          <Suspense fallback={<MyTransactionSkeleton />}>
+            <MyTransaction />
+          </Suspense>
+        ),
+      },
+      {
+        path: "transaction/:id",
+        Component: TransactionDetails,
+      },
+      {
+        path: "reports",
         element: (
           <Suspense fallback={<ReportsSkeleton />}>
-            <PrivateRoute skeleton={<ReportsSkeleton />}>
-              <Reports />
-            </PrivateRoute>
+            <Reports />
           </Suspense>
         ),
       },

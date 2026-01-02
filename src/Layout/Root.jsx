@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { Outlet } from 'react-router';
 import Navbar from '../Components/Navbar';
 import Footer from '../Components/Footer';
+import FloatingAddButton from '../Components/FloatingAddButton';
 import PageSkeleton from '../Components/PageSkeleton';
 
 const Root = () => {
@@ -13,6 +14,7 @@ const Root = () => {
                     <Outlet />
                 </Suspense>
             </div>
+            <FloatingAddButton />
             <Footer />
         </div>
     );
