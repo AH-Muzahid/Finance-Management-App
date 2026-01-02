@@ -10,16 +10,16 @@ const Privacy = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-16">
             {/* Hero Section */}
-            <div className="bg-linear-to-br from-blue-500 via-blue-600 to-indigo-600 dark:bg-linear-to-br dark:from-blue-700 dark:via-blue-800 dark:to-indigo-800 py-16">
+            <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 py-16">
                 <div className="max-w-[1220px] mx-auto px-6 text-center">
                     <div className="flex justify-center mb-4">
                         <FaShieldAlt className="text-6xl text-white" />
                     </div>
                     <h1 className="text-4xl font-bold text-white mb-4">Privacy Policy</h1>
-                    <p className="text-lg text-blue-100 max-w-2xl mx-auto">
+                    <p className="text-lg text-primary-100 max-w-2xl mx-auto">
                         Your privacy is important to us. Learn how we collect, use, and protect your personal information.
                     </p>
-                    <p className="text-sm text-blue-200 mt-4">Last Updated: January 2, 2026</p>
+                    <p className="text-sm text-primary-200 mt-4">Last Updated: January 2, 2026</p>
                 </div>
             </div>
 
@@ -40,7 +40,7 @@ const Privacy = () => {
                     {/* Information We Collect */}
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaDatabase className="text-3xl text-blue-500" />
+                            <FaDatabase className="text-3xl text-secondary-500" />
                             <h2 className="text-3xl font-bold text-base-content">Information We Collect</h2>
                         </div>
                         <div className="space-y-4">
@@ -74,7 +74,7 @@ const Privacy = () => {
                     {/* How We Use Your Information */}
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaUserShield className="text-3xl text-green-500" />
+                            <FaUserShield className="text-3xl text-accent-500" />
                             <h2 className="text-3xl font-bold text-base-content">How We Use Your Information</h2>
                         </div>
                         <div className="space-y-3 text-base-content/80">
@@ -93,13 +93,13 @@ const Privacy = () => {
                     {/* Data Security */}
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaLock className="text-3xl text-orange-500" />
+                            <FaLock className="text-3xl text-primary-500" />
                             <h2 className="text-3xl font-bold text-base-content">Data Security</h2>
                         </div>
                         <p className="text-base-content/80 mb-4">
                             We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure, or destruction.
                         </p>
-                        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
+                        <div className="bg-secondary-50 dark:bg-secondary-900/20 border border-secondary-200 dark:border-secondary-700 rounded-lg p-6">
                             <h3 className="font-bold text-base-content mb-2">Security Measures:</h3>
                             <ul className="list-disc list-inside text-base-content/80 space-y-2">
                                 <li>End-to-end encryption for sensitive data</li>
@@ -113,7 +113,7 @@ const Privacy = () => {
                     {/* Cookies */}
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaCookie className="text-3xl text-yellow-500" />
+                            <FaCookie className="text-3xl text-primary-400" />
                             <h2 className="text-3xl font-bold text-base-content">Cookies and Tracking</h2>
                         </div>
                         <p className="text-base-content/80 mb-4">
@@ -148,7 +148,7 @@ const Privacy = () => {
                     {/* Contact */}
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaEnvelope className="text-3xl text-purple-500" />
+                            <FaEnvelope className="text-3xl text-secondary-600" />
                             <h2 className="text-3xl font-bold text-base-content">Contact Us</h2>
                         </div>
                         <p className="text-base-content/80 mb-4">
@@ -159,13 +159,13 @@ const Privacy = () => {
                                 <strong>Email:</strong> support@finease.com
                             </p>
                             <p className="text-base-content/80 mt-2">
-                                <strong>Contact Page:</strong> <Link to="/contact" className="text-blue-500 hover:underline">Visit our contact page</Link>
+                                <strong>Contact Page:</strong> <Link to="/contact" className="text-secondary-500 hover:underline">Visit our contact page</Link>
                             </p>
                         </div>
                     </section>
 
                     {/* Updates */}
-                    <section className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-6">
+                    <section className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-lg p-6">
                         <h2 className="text-2xl font-bold text-base-content mb-3">Changes to This Privacy Policy</h2>
                         <p className="text-base-content/80">
                             We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.

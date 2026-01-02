@@ -42,19 +42,19 @@ const Contact = () => {
 
     const contactInfo = [
         {
-            icon: <FaEnvelope className="text-3xl text-orange-500" />,
+            icon: <FaEnvelope className="text-3xl text-primary-500" />,
             title: "Email Us",
             content: "support@finease.com",
             link: "mailto:support@finease.com"
         },
         {
-            icon: <FaPhone className="text-3xl text-green-500" />,
+            icon: <FaPhone className="text-3xl text-accent-500" />,
             title: "Call Us",
             content: "+880 1234-567890",
             link: "tel:+8801234567890"
         },
         {
-            icon: <FaMapMarkerAlt className="text-3xl text-blue-500" />,
+            icon: <FaMapMarkerAlt className="text-3xl text-secondary-500" />,
             title: "Visit Us",
             content: "Dhaka, Bangladesh",
             link: null
@@ -91,10 +91,10 @@ const Contact = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-16">
             {/* Hero Section */}
-            <div className="bg-linear-to-br from-orange-400 via-orange-500 to-red-500 dark:bg-linear-to-br dark:from-orange-600 dark:via-orange-700 dark:to-red-700 py-20">
+            <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 py-20">
                 <div className="max-w-[1220px] mx-auto px-6 text-center">
                     <h1 className="text-5xl font-bold text-white mb-6">Get In Touch</h1>
-                    <p className="text-xl text-orange-100 mb-8 max-w-3xl mx-auto">
+                    <p className="text-xl text-primary-100 mb-8 max-w-3xl mx-auto">
                         Have questions about FinEase? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
                     </p>
                 </div>
@@ -114,7 +114,7 @@ const Contact = () => {
                                 {info.link ? (
                                     <a
                                         href={info.link}
-                                        className="text-base-content/70 hover:text-orange-500 transition-colors"
+                                        className="text-base-content/70 hover:text-primary-500 transition-colors"
                                     >
                                         {info.content}
                                     </a>
@@ -142,7 +142,7 @@ const Contact = () => {
                                         value={formData.name}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="John Doe"
                                     />
                                 </div>
@@ -158,7 +158,7 @@ const Contact = () => {
                                         value={formData.email}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="john@example.com"
                                     />
                                 </div>
@@ -174,7 +174,7 @@ const Contact = () => {
                                         value={formData.subject}
                                         onChange={handleChange}
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         placeholder="How can we help?"
                                     />
                                 </div>
@@ -190,7 +190,7 @@ const Contact = () => {
                                         onChange={handleChange}
                                         required
                                         rows="5"
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-base-100 text-base-content focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                                         placeholder="Tell us more about your inquiry..."
                                     ></textarea>
                                 </div>
@@ -198,7 +198,7 @@ const Contact = () => {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isSubmitting ? (
                                         <>
@@ -269,7 +269,7 @@ const Contact = () => {
                             </div>
 
                             {/* Business Hours */}
-                            <div className="bg-linear-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 rounded-xl p-8 border border-orange-200 dark:border-orange-700">
+                            <div className="bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 rounded-xl p-8 border border-primary-200 dark:border-primary-700">
                                 <h2 className="text-2xl font-bold text-base-content mb-4">Support Hours</h2>
                                 <div className="space-y-2 text-base-content/80">
                                     <p><strong>Monday - Friday:</strong> 9:00 AM - 6:00 PM</p>

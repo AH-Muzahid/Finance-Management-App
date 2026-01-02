@@ -72,9 +72,9 @@ const Navbar = () => {
                             <li key={link.name}>
                                 <Link
                                     to={link.path}
-                                    className={`rounded-lg px-3 py-2 transition-colors ${location.pathname === link.path
-                                        ? 'text-orange-500 bg-gray-100 dark:bg-gray-800'
-                                        : 'text-gray-600 dark:text-gray-300 hover:text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                    className={`rounded-lg px-3 py-2 transition-colors font-medium ${location.pathname === link.path
+                                        ? 'text-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                                        : 'text-gray-600 dark:text-gray-300 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/10'
                                         }`}
                                 >
                                     {link.name}
@@ -93,7 +93,7 @@ const Navbar = () => {
                     {/* Mobile Menu Button */}
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="md:hidden text-base-content hover:text-orange-500 transition-colors p-2"
+                        className="md:hidden text-base-content hover:text-primary-500 transition-colors p-2"
                     >
                         {isMobileMenuOpen ? <FaTimes className="text-2xl" /> : <FaBars className="text-2xl" />}
                     </button>
@@ -103,13 +103,13 @@ const Navbar = () => {
                         <div className="relative hidden md:block" ref={dropdownRef}>
                             <button
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                                className="p-2 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors"
                             >
-                                <div className="w-8 h-8 rounded-full">
+                                <div className="w-8 h-8 rounded-full ring-2 ring-primary-500/20">
                                     {user.photoURL ? (
                                         <img src={user.photoURL} alt="Profile" className="w-full h-full rounded-full object-cover" />
                                     ) : (
-                                        <div className="bg-blue-500 w-full h-full flex items-center justify-center rounded-full">
+                                        <div className="bg-gradient-to-br from-primary-500 to-primary-600 w-full h-full flex items-center justify-center rounded-full">
                                             <FaUser className="text-white text-sm" />
                                         </div>
                                     )}
@@ -121,15 +121,15 @@ const Navbar = () => {
                                         <span className="text-black dark:text-white font-medium">{user.displayName || 'User'}</span>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                                     </li>
-                                    <li><Link to="/dashboard/profile" onClick={() => setIsDropdownOpen(false)} className="w-full text-left px-3 py-2 text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded block">Profile</Link></li>
-                                    <li><button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Logout</button></li>
+                                    <li><Link to="/dashboard/profile" onClick={() => setIsDropdownOpen(false)} className="w-full text-left px-3 py-2 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded block font-medium">Profile</Link></li>
+                                    <li><button onClick={handleLogout} className="w-full text-left px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded font-medium">Logout</button></li>
                                 </ul>
                             )}
                         </div>
                     ) : (
                         <div className="hidden md:flex gap-2">
-                            <Link to="/login" className="bg-white dark:bg-black text-orange-500 border border-orange-500 hover:bg-orange-500 hover:text-white px-4 py-2 rounded-lg font-semibold transition-colors">Login</Link>
-                            <Link to="/register" className="bg-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg font-semibold transition-colors">Sign Up</Link>
+                            <Link to="/login" className="bg-white dark:bg-black text-primary-500 border-2 border-primary-500 hover:bg-primary-500 hover:text-white px-4 py-2 rounded-lg font-semibold transition-all">Login</Link>
+                            <Link to="/register" className="bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 px-4 py-2 rounded-lg font-semibold transition-all shadow-lg shadow-primary-500/30">Sign Up</Link>
                         </div>
                     )}
                 </div>
@@ -155,9 +155,9 @@ const Navbar = () => {
                             key={link.name}
                             to={link.path}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className={`block px-4 py-3 rounded-lg transition-colors ${location.pathname === link.path
-                                ? 'bg-orange-500 text-white'
-                                : 'text-base-content hover:bg-gray-100 dark:hover:bg-gray-700'
+                            className={`block px-4 py-3 rounded-lg transition-colors font-medium ${location.pathname === link.path
+                                ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30'
+                                : 'text-base-content hover:bg-primary-50 dark:hover:bg-primary-900/20'
                                 }`}
                         >
                             {link.name}
@@ -177,13 +177,13 @@ const Navbar = () => {
                             <Link
                                 to="/dashboard/profile"
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-lg text-orange-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                className="block px-4 py-3 rounded-lg text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 font-medium"
                             >
                                 Profile
                             </Link>
                             <button
                                 onClick={handleLogout}
-                                className="w-full text-left px-4 py-3 rounded-lg text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                className="w-full text-left px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 font-medium"
                             >
                                 Logout
                             </button>
@@ -193,14 +193,14 @@ const Navbar = () => {
                             <Link
                                 to="/login"
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-lg bg-white dark:bg-black text-orange-500 border border-orange-500 hover:bg-orange-500 hover:text-white transition-colors text-center font-semibold"
+                                className="block px-4 py-3 rounded-lg bg-white dark:bg-black text-primary-500 border-2 border-primary-500 hover:bg-primary-500 hover:text-white transition-all text-center font-semibold"
                             >
                                 Login
                             </Link>
                             <Link
                                 to="/register"
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors text-center font-semibold"
+                                className="block px-4 py-3 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 transition-all text-center font-semibold shadow-lg shadow-primary-500/30"
                             >
                                 Sign Up
                             </Link>

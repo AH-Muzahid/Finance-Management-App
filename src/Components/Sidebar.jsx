@@ -53,14 +53,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 {/* Sidebar Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                     <Link to="/" className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center shadow-lg shadow-primary-500/30">
                             <span className="text-white font-bold text-lg">F</span>
                         </div>
                         <span className="text-xl font-bold text-base-content">FinEase</span>
                     </Link>
                     <button
                         onClick={toggleSidebar}
-                        className="lg:hidden text-base-content hover:text-orange-500 transition-colors"
+                        className="lg:hidden text-base-content hover:text-primary-500 transition-colors"
                     >
                         <FaTimes className="text-xl" />
                     </button>
@@ -70,7 +70,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 {user && (
                     <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-full overflow-hidden bg-orange-100 dark:bg-orange-900">
+                            <div className="w-12 h-12 rounded-full overflow-hidden bg-primary-50 dark:bg-primary-900/20 ring-2 ring-primary-500/20">
                                 {user.photoURL ? (
                                     <img
                                         src={user.photoURL}
@@ -79,7 +79,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center">
-                                        <FaUser className="text-orange-500 text-xl" />
+                                        <FaUser className="text-primary-500 text-xl" />
                                     </div>
                                 )}
                             </div>
@@ -102,9 +102,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                             key={item.path}
                             to={item.path}
                             onClick={() => window.innerWidth < 1024 && toggleSidebar()}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${location.pathname === item.path
-                                ? 'bg-orange-500 text-white shadow-lg'
-                                : 'text-base-content hover:bg-gray-100 dark:hover:bg-gray-700'
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium ${location.pathname === item.path
+                                ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30'
+                                : 'text-base-content hover:bg-primary-50 dark:hover:bg-primary-900/20'
                                 }`}
                         >
                             {item.icon}

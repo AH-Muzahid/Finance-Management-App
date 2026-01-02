@@ -51,10 +51,10 @@ const About = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-16">
             {/* Hero Section */}
-            <div className="bg-linear-to-br from-orange-400 via-orange-500 to-red-500 dark:bg-linear-to-br dark:from-orange-600 dark:via-orange-700 dark:to-red-700 py-20">
+            <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 py-20">
                 <div className="max-w-[1220px] mx-auto px-6 text-center">
                     <h1 className="text-5xl font-bold text-white mb-6">About FinEase</h1>
-                    <p className="text-xl text-orange-100 mb-8 max-w-3xl mx-auto">
+                    <p className="text-xl text-primary-100 mb-8 max-w-3xl mx-auto">
                         Your trusted companion for personal finance management. We're on a mission to make financial tracking simple, intuitive, and accessible for everyone.
                     </p>
                 </div>
@@ -156,16 +156,16 @@ const About = () => {
             </div>
 
             {/* CTA Section */}
-            <div className="bg-linear-to-br from-orange-400 via-orange-500 to-red-500 dark:bg-linear-to-br dark:from-orange-600 dark:via-orange-700 dark:to-red-700 py-16">
+            <div className="bg-gradient-to-br from-primary-500 to-primary-600 py-16">
                 <div className="max-w-[1220px] mx-auto px-6 text-center">
                     <h2 className="text-4xl font-bold text-white mb-6">Ready to Take Control?</h2>
-                    <p className="text-xl text-orange-100 mb-8 max-w-2xl mx-auto">
+                    <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
                         Join thousands of users who are already managing their finances smarter with FinEase
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link
                             to="/register"
-                            className="bg-white text-orange-600 px-8 py-3 rounded-lg font-semibold hover:bg-orange-50 transition-colors shadow-lg"
+                            className="bg-white text-primary-600 px-8 py-3 rounded-lg font-semibold hover:bg-primary-50 transition-colors shadow-lg"
                         >
                             Get Started Free
                         </Link>

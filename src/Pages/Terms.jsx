@@ -10,16 +10,16 @@ const Terms = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-16">
             {/* Hero Section */}
-            <div className="bg-linear-to-br from-purple-500 via-purple-600 to-indigo-600 dark:bg-linear-to-br dark:from-purple-700 dark:via-purple-800 dark:to-indigo-800 py-16">
+            <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 py-16">
                 <div className="max-w-[1220px] mx-auto px-6 text-center">
                     <div className="flex justify-center mb-4">
                         <FaFileContract className="text-6xl text-white" />
                     </div>
                     <h1 className="text-4xl font-bold text-white mb-4">Terms & Conditions</h1>
-                    <p className="text-lg text-purple-100 max-w-2xl mx-auto">
+                    <p className="text-lg text-primary-100 max-w-2xl mx-auto">
                         Please read these terms and conditions carefully before using FinEase.
                     </p>
-                    <p className="text-sm text-purple-200 mt-4">Last Updated: January 2, 2026</p>
+                    <p className="text-sm text-primary-200 mt-4">Last Updated: January 2, 2026</p>
                 </div>
             </div>
 
@@ -32,7 +32,7 @@ const Terms = () => {
                         <p className="text-base-content/80 mb-4">
                             By accessing and using FinEase, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms & Conditions, please do not use our service.
                         </p>
-                        <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6">
+                        <div className="bg-secondary-50 dark:bg-secondary-900/20 border border-secondary-200 dark:border-secondary-700 rounded-lg p-6">
                             <p className="text-base-content/80">
                                 <strong>Important:</strong> These terms constitute a legally binding agreement between you and FinEase. Please read them carefully.
                             </p>
@@ -42,7 +42,7 @@ const Terms = () => {
                     {/* Use of Service */}
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaUserCheck className="text-3xl text-green-500" />
+                            <FaUserCheck className="text-3xl text-accent-500" />
                             <h2 className="text-3xl font-bold text-base-content">Use of Service</h2>
                         </div>
                         <div className="space-y-4">
@@ -82,7 +82,7 @@ const Terms = () => {
                             <p>
                                 You retain all rights to the financial data and information you input into FinEase. However, by using our service, you grant us a license to use, store, and process your data solely for the purpose of providing our services to you.
                             </p>
-                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6">
+                            <div className="bg-secondary-50 dark:bg-secondary-900/20 border border-secondary-200 dark:border-secondary-700 rounded-lg p-6">
                                 <h3 className="font-bold text-base-content mb-2">Your Responsibilities:</h3>
                                 <ul className="list-disc list-inside space-y-2">
                                     <li>Ensure accuracy of your financial data</li>
@@ -96,7 +96,7 @@ const Terms = () => {
                     {/* Service Availability */}
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaCheckCircle className="text-3xl text-blue-500" />
+                            <FaCheckCircle className="text-3xl text-primary-400" />
                             <h2 className="text-3xl font-bold text-base-content">Service Availability</h2>
                         </div>
                         <p className="text-base-content/80 mb-4">
@@ -113,10 +113,10 @@ const Terms = () => {
                     {/* Disclaimer */}
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaExclamationTriangle className="text-3xl text-orange-500" />
+                            <FaExclamationTriangle className="text-3xl text-primary-500" />
                             <h2 className="text-3xl font-bold text-base-content">Disclaimer of Warranties</h2>
                         </div>
-                        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-lg p-6">
+                        <div className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-700 rounded-lg p-6">
                             <p className="text-base-content/80 mb-4">
                                 FinEase is provided "AS IS" and "AS AVAILABLE" without warranties of any kind, either express or implied.
                             </p>
@@ -129,7 +129,7 @@ const Terms = () => {
                     {/* Limitation of Liability */}
                     <section className="mb-12">
                         <div className="flex items-center gap-3 mb-4">
-                            <FaGavel className="text-3xl text-red-500" />
+                            <FaGavel className="text-3xl text-primary-700" />
                             <h2 className="text-3xl font-bold text-base-content">Limitation of Liability</h2>
                         </div>
                         <p className="text-base-content/80 mb-4">
@@ -181,13 +181,13 @@ const Terms = () => {
                                 <strong>Email:</strong> support@finease.com
                             </p>
                             <p className="text-base-content/80 mt-2">
-                                <strong>Contact Page:</strong> <Link to="/contact" className="text-purple-500 hover:underline">Visit our contact page</Link>
+                                <strong>Contact Page:</strong> <Link to="/contact" className="text-secondary-500 hover:underline">Visit our contact page</Link>
                             </p>
                         </div>
                     </section>
 
                     {/* Governing Law */}
-                    <section className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6">
+                    <section className="bg-secondary-50 dark:bg-secondary-900/20 border border-secondary-200 dark:border-secondary-700 rounded-lg p-6">
                         <h2 className="text-2xl font-bold text-base-content mb-3">Governing Law</h2>
                         <p className="text-base-content/80">
                             These Terms & Conditions shall be governed by and construed in accordance with the laws of Bangladesh, without regard to its conflict of law provisions.
