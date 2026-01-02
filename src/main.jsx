@@ -1,24 +1,30 @@
-import React from 'react'
-import { createBrowserRouter } from 'react-router'
-import { StrictMode } from 'react'
+import React, { StrictMode, Suspense } from 'react'
+import { createBrowserRouter, RouterProvider } from 'react-router'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import { RouterProvider } from "react-router";
 import { Toaster } from 'react-hot-toast';
 
 import Root from './Layout/Root';
-import Profile from './Pages/Profile';
-import Home from './Pages/Home';
-import Login from './Pages/Login';
-import Registration from './Pages/Regestration';
-import ForgetPass from './Components/ForgetPass';
-import UpdateProfile from './Components/UpdateProfile';
-import AddTransaction from './Pages/AddTransaction';
-import MyTransaction from './Pages/MyTransaction';
-import Reports from './Pages/Reports';
-import TransactionDetails from './Pages/TransactionDetails';
-import NotFound from './Pages/NotFound';
 import PrivateRoute from './Components/PrivateRoute';
+import ReportsSkeleton from './Components/ReportsSkeleton';
+import MyTransactionSkeleton from './Components/MyTransactionSkeleton';
+
+// Lazy load pages
+// Lazy load pages
+// Lazy load pages
+// Lazy load pages
+const Profile = React.lazy(() => import('./Pages/Profile'));
+// Eager load Home to avoid double skeleton
+import Home from './Pages/Home';
+const Login = React.lazy(() => import('./Pages/Login'));
+const Registration = React.lazy(() => import('./Pages/Regestration'));
+const ForgetPass = React.lazy(() => import('./Components/ForgetPass'));
+const UpdateProfile = React.lazy(() => import('./Components/UpdateProfile'));
+const AddTransaction = React.lazy(() => import('./Pages/AddTransaction'));
+const MyTransaction = React.lazy(() => import('./Pages/MyTransaction'));
+const Reports = React.lazy(() => import('./Pages/Reports'));
+const TransactionDetails = React.lazy(() => import('./Pages/TransactionDetails'));
+const NotFound = React.lazy(() => import('./Pages/NotFound'));
 
 const router = createBrowserRouter([
   {
@@ -68,9 +74,11 @@ const router = createBrowserRouter([
       {
         path: "/my-transactions",
         element: (
-          <PrivateRoute>
-            <MyTransaction />
-          </PrivateRoute>
+          <Suspense fallback={<MyTransactionSkeleton />}>
+            <PrivateRoute skeleton={<MyTransactionSkeleton />}>
+              <MyTransaction />
+            </PrivateRoute>
+          </Suspense>
         ),
       },
       {
@@ -84,9 +92,11 @@ const router = createBrowserRouter([
       {
         path: "/reports",
         element: (
-          <PrivateRoute>
-            <Reports />
-          </PrivateRoute>
+          <Suspense fallback={<ReportsSkeleton />}>
+            <PrivateRoute skeleton={<ReportsSkeleton />}>
+              <Reports />
+            </PrivateRoute>
+          </Suspense>
         ),
       },
     ]
@@ -96,6 +106,7 @@ const router = createBrowserRouter([
     Component: NotFound,
   }
 ])
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <RouterProvider router={router} />

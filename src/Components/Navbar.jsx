@@ -1,15 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router';
-import { useAuthState } from 'react-firebase-hooks/auth';
 import { signOut } from 'firebase/auth';
 import { auth } from '../Firebase/firebase.init';
 import SimpleThemeToggle from './SimpleThemeToggle';
+import useUser from '../hooks/useUser';
 
 import { FaBars, FaTimes, FaUser, FaHome, FaPlus, FaList, FaChartBar } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 const Navbar = () => {
-    const [user] = useAuthState(auth);
+    const [user] = useUser();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [, setThemeChangeCounter] = useState(0);
     const navigate = useNavigate();
@@ -35,6 +35,7 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         setIsDropdownOpen(false);
+        localStorage.removeItem('user');
         await signOut(auth);
         toast.success('Logged out successfully!');
         navigate('/');
@@ -50,7 +51,7 @@ const Navbar = () => {
     return (
         <>
             {/* Top Navbar - Desktop & Mobile */}
-            <div className="navbar backdrop-blur-md bg-white dark:bg-black/60 border-b border-gray-200/50 dark:border-gray-700/50 fixed top-0 left-0 right-0 z-40 transition-all px-4 md:px-10">
+            <div className="navbar backdrop-blur-md bg-white dark:bg-black/60 border-b border-gray-200/50 dark:border-gray-700/50 fixed top-0 left-0 right-0 z-40 transition-all px-6 md:px-10">
                 {/* Logo */}
                 <div className="navbar-start">
                     <Link to="/" className="flex items-center space-x-3">
@@ -125,7 +126,7 @@ const Navbar = () => {
             {/* Mobile Bottom Navigation - Custom Dock */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 z-40">
                 <div
-                    className="border-t border-gray-200/60 dark:border-gray-700/60 backdrop-blur-2xl shadow-2xl dark:shadow-2xl transition-colors duration-300"
+                    className=" m-2 rounded-2xl border border-gray-200/60 dark:border-gray-700/60 backdrop-blur-2xl shadow-2xl dark:shadow-2xl transition-colors duration-300"
                     style={{
                         backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#ffffff',
                     }}

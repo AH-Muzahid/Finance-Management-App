@@ -4,7 +4,8 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
 import { getTransaction, deleteTransaction, getTransactions } from '../api/transactions';
 import { FaArrowLeft, FaEdit, FaTrash, FaCalendarAlt, FaTag, FaDollarSign, FaStickyNote } from 'react-icons/fa';
-import LoadingSpinner from '../Components/LoadingSpinner';
+
+import PageSkeleton from '../Components/PageSkeleton';
 import Swal from 'sweetalert2';
 
 const TransactionDetails = () => {
@@ -89,7 +90,7 @@ const TransactionDetails = () => {
     };
 
     if (loading) {
-        return <LoadingSpinner fullScreen />;
+        return <PageSkeleton />;
     }
 
     if (!transaction) {

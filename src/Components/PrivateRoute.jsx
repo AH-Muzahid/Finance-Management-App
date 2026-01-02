@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../Firebase/firebase.init';
-import LoadingSpinner from './LoadingSpinner';
+import PageSkeleton from './PageSkeleton';
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children, skeleton }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const location = useLocation();
@@ -18,7 +18,7 @@ const PrivateRoute = ({ children }) => {
     }, []);
 
     if (loading) {
-        return <LoadingSpinner fullScreen />;
+        return skeleton || <PageSkeleton />;
     }
 
     if (!user) {

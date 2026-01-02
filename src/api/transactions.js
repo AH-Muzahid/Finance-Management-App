@@ -23,9 +23,16 @@ export const saveTransaction = async (transactionData) => {
     }
 };
 
-export const getTransactions = async (email, sortBy = 'date', sortOrder = 'desc') => {
+export const getTransactions = async (email, sortBy = 'date', sortOrder = 'desc', timeout = 10000) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/my-transactions?email=${email}&sortBy=${sortBy}&sortOrder=${sortOrder}`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        
+        const response = await fetch(`${API_BASE_URL}/my-transactions?email=${email}&sortBy=${sortBy}&sortOrder=${sortOrder}`, {
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
             throw new Error('Failed to fetch transactions');
@@ -33,7 +40,11 @@ export const getTransactions = async (email, sortBy = 'date', sortOrder = 'desc'
         
         return await response.json();
     } catch (error) {
-        console.error('Error fetching transactions:', error);
+        if (error.name === 'AbortError') {
+            console.error('Fetch timeout: Transactions took too long to load');
+        } else {
+            console.error('Error fetching transactions:', error);
+        }
         throw error;
     }
 };

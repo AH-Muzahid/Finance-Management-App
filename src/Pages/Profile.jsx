@@ -5,7 +5,7 @@ import { updateProfile } from 'firebase/auth';
 
 import { FaUser, FaEnvelope, FaEdit, FaSave, FaTimes, FaSignOutAlt } from 'react-icons/fa';
 import toast from 'react-hot-toast';
-import LoadingSpinner from '../Components/LoadingSpinner';
+
 import Swal from 'sweetalert2';
 
 const Profile = () => {
@@ -107,20 +107,20 @@ const Profile = () => {
                         <h1 className="text-3xl font-bold text-base-content mb-2">My Profile</h1>
                         <p className="text-base-content/70">Manage your account information</p>
                     </div>
-                    
+
                     <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 p-8">
                         {/* Profile Picture */}
                         <div className="text-center mb-8">
-                            <div 
+                            <div
                                 className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-orange-500 flex items-center justify-center"
-                                style={{ 
+                                style={{
                                     backgroundColor: user?.photoURL ? '#f3f4f6' : getAvatarColor(user?.displayName || user?.email || 'User')
                                 }}
                             >
                                 {user?.photoURL ? (
-                                    <img 
-                                        src={user.photoURL} 
-                                        alt="Profile" 
+                                    <img
+                                        src={user.photoURL}
+                                        alt="Profile"
                                         className="w-full h-full object-cover"
                                         onError={(e) => {
                                             e.target.style.display = 'none';
@@ -195,7 +195,6 @@ const Profile = () => {
                                         >
                                             {loading ? (
                                                 <>
-                                                    <LoadingSpinner size="sm" />
                                                     Saving...
                                                 </>
                                             ) : (
