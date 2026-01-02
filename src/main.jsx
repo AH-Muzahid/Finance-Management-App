@@ -24,6 +24,8 @@ const Reports = React.lazy(() => import('./Pages/Reports'));
 const TransactionDetails = React.lazy(() => import('./Pages/TransactionDetails'));
 const About = React.lazy(() => import('./Pages/About'));
 const Contact = React.lazy(() => import('./Pages/Contact'));
+const Privacy = React.lazy(() => import('./Pages/Privacy'));
+const Terms = React.lazy(() => import('./Pages/Terms'));
 const NotFound = React.lazy(() => import('./Pages/NotFound'));
 
 const router = createBrowserRouter([
@@ -54,6 +56,14 @@ const router = createBrowserRouter([
       {
         path: "/contact",
         Component: Contact,
+      },
+      {
+        path: "/privacy",
+        Component: Privacy,
+      },
+      {
+        path: "/terms",
+        Component: Terms,
       },
     ]
   },
