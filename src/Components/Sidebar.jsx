@@ -10,7 +10,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     const menuItems = [
         {
             name: 'Dashboard',
-            path: '/',
+            path: '/dashboard',
             icon: <FaHome className="text-xl" />
         },
         {
@@ -53,7 +53,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 {/* Sidebar Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
                     <Link to="/" className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary-500 via-purple-500 to-secondary-500 rounded-lg flex items-center justify-center shadow-lg shadow-primary-500/30">
+                        <div className="w-10 h-10 bg-primary-500 rounded-lg flex items-center justify-center shadow-lg shadow-primary-500/30">
                             <span className="text-white font-bold text-lg">F</span>
                         </div>
                         <span className="text-xl font-bold text-base-content">FinEase</span>
@@ -103,7 +103,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                             to={item.path}
                             onClick={() => window.innerWidth < 1024 && toggleSidebar()}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 font-medium ${location.pathname === item.path
-                                ? 'bg-gradient-to-r from-primary-500 via-purple-500 to-secondary-500 text-white shadow-lg shadow-primary-500/30'
+                                ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/30'
                                 : 'text-base-content hover:bg-primary-50 dark:hover:bg-primary-900/20'
                                 }`}
                         >

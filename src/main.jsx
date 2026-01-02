@@ -1,5 +1,5 @@
 import React, { StrictMode, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { Toaster } from 'react-hot-toast';
@@ -14,6 +14,7 @@ import MyTransactionSkeleton from './Components/MyTransactionSkeleton';
 const Profile = React.lazy(() => import('./Pages/Profile'));
 // Eager load Home to avoid double skeleton
 import Home from './Pages/Home';
+const DashboardHome = React.lazy(() => import('./Pages/DashboardHome')); // Import DashboardHome
 const Login = React.lazy(() => import('./Pages/Login'));
 const Registration = React.lazy(() => import('./Pages/Regestration'));
 const ForgetPass = React.lazy(() => import('./Components/ForgetPass'));
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
       </PrivateRoute>
     ),
     children: [
+      {
+        index: true,
+        Component: DashboardHome // Set DashboardHome as index
+      },
       {
         path: "profile",
         Component: Profile,

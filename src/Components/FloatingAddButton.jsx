@@ -18,7 +18,7 @@ const FloatingAddButton = () => {
     return (
         <Link
             to="/dashboard/add-transaction"
-            className="md:hidden fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-primary-500 via-purple-500 to-secondary-500 text-white rounded-full shadow-2xl shadow-primary-500/40 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-50"
+            className="md:hidden fixed bottom-6 right-6 w-16 h-16 bg-primary-500 hover:bg-primary-600 text-white rounded-full shadow-2xl shadow-primary-500/40 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 z-50"
             title="Add Transaction"
         >
             <FaPlus className="text-2xl" />
