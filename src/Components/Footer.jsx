@@ -66,6 +66,9 @@ const Footer = () => {
                             <Link to="/about" className="block text-white/80 hover:text-white transition-colors">
                                 About Us
                             </Link>
+                            <Link to="/contact" className="block text-white/80 hover:text-white transition-colors">
+                                Contact
+                            </Link>
                             <Link to="/privacy" className="block text-white/80 hover:text-white transition-colors">
                                 Privacy Policy
                             </Link>
