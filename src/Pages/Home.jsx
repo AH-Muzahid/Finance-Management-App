@@ -78,7 +78,7 @@ const Home = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-16">
             {/* Hero Section - Always Visible */}
-            <div className="bg-gradient-to-br from-primary-500 via-primary-600 to-secondary-600 py-20">
+            <div className="bg-gradient-to-br from-primary-500 via-purple-500 to-secondary-500 py-20">
                 <div className="max-w-[1220px] mx-auto px-6 text-center">
                     <h1 className="text-5xl font-bold text-white mb-6">Take Control of Your Money</h1>
                     <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">Track, manage, and grow your wealth with FinEase - your personal finance companion</p>

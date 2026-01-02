@@ -109,7 +109,7 @@ const Navbar = () => {
                                     {user.photoURL ? (
                                         <img src={user.photoURL} alt="Profile" className="w-full h-full rounded-full object-cover" />
                                     ) : (
-                                        <div className="bg-gradient-to-br from-primary-500 to-primary-600 w-full h-full flex items-center justify-center rounded-full">
+                                        <div className="bg-gradient-to-br from-primary-500 via-purple-500 to-secondary-500 w-full h-full flex items-center justify-center rounded-full">
                                             <FaUser className="text-white text-sm" />
                                         </div>
                                     )}
@@ -129,7 +129,7 @@ const Navbar = () => {
                     ) : (
                         <div className="hidden md:flex gap-2">
                             <Link to="/login" className="bg-white dark:bg-black text-primary-500 border-2 border-primary-500 hover:bg-primary-500 hover:text-white px-4 py-2 rounded-lg font-semibold transition-all">Login</Link>
-                            <Link to="/register" className="bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 px-4 py-2 rounded-lg font-semibold transition-all shadow-lg shadow-primary-500/30">Sign Up</Link>
+                            <Link to="/register" className="bg-gradient-to-r from-primary-500 via-purple-500 to-secondary-500 text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-lg shadow-primary-500/30">Sign Up</Link>
                         </div>
                     )}
                 </div>
@@ -156,7 +156,7 @@ const Navbar = () => {
                             to={link.path}
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`block px-4 py-3 rounded-lg transition-colors font-medium ${location.pathname === link.path
-                                ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg shadow-primary-500/30'
+                                ? 'bg-gradient-to-r from-primary-500 via-purple-500 to-secondary-500 text-white shadow-lg shadow-primary-500/30'
                                 : 'text-base-content hover:bg-primary-50 dark:hover:bg-primary-900/20'
                                 }`}
                         >
@@ -200,7 +200,7 @@ const Navbar = () => {
                             <Link
                                 to="/register"
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="block px-4 py-3 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 transition-all text-center font-semibold shadow-lg shadow-primary-500/30"
+                                className="block px-4 py-3 rounded-lg bg-gradient-to-r from-primary-500 via-purple-500 to-secondary-500 text-white transition-all text-center font-semibold shadow-lg shadow-primary-500/30"
                             >
                                 Sign Up
                             </Link>
