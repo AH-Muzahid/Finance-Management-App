@@ -46,6 +46,8 @@ const Navbar = () => {
         { name: 'Home', path: '/', public: true },
         { name: 'About', path: '/about', public: true },
         { name: 'Contact', path: '/contact', public: true },
+        { name: 'Privacy', path: '/privacy', public: true },
+        { name: 'Terms', path: '/terms', public: true },
         { name: 'Dashboard', path: '/dashboard/add-transaction', public: false }
     ];
 
@@ -154,8 +156,8 @@ const Navbar = () => {
                             to={link.path}
                             onClick={() => setIsMobileMenuOpen(false)}
                             className={`block px-4 py-3 rounded-lg transition-colors ${location.pathname === link.path
-                                    ? 'bg-orange-500 text-white'
-                                    : 'text-base-content hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ? 'bg-orange-500 text-white'
+                                : 'text-base-content hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                         >
                             {link.name}
