@@ -92,9 +92,9 @@ const AddTransaction = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-base-100 pt-20">
+        <div className="min-h-screen flex items-center justify-center md:p-4 bg-gray-50 dark:bg-base-100 ">
             <div className="w-full max-w-md">
-                <div className="bg-white dark:bg-base-200 rounded-2xl shadow-xl border border-gray-100 dark:border-base-300 p-8">
+                <div className="bg-white dark:bg-base-200 rounded-2xl shadow-xl  p-8">
                     <div className="text-center mb-8">
                         <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                             <FaPlus className="text-white text-xl" />
@@ -178,7 +178,7 @@ const AddTransaction = () => {
                             <input
                                 type="number"
                                 name="amount"
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
                                 placeholder="Enter amount"
                                 required
                             />
@@ -197,7 +197,7 @@ const AddTransaction = () => {
                                     name="personName"
                                     value={personName}
                                     onChange={(e) => setPersonName(e.target.value)}
-                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
                                     placeholder={type === 'receivable' ? 'Enter debtor name' : 'Enter creditor name'}
                                     required
                                 />
@@ -210,7 +210,7 @@ const AddTransaction = () => {
                             </div>
                             <input type="hidden" name="category" value={selectedCategory} required />
                             <div
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all cursor-pointer flex items-center justify-between"
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all cursor-pointer flex items-center justify-between"
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                             >
                                 <span className={selectedCategory ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400'}>
@@ -247,7 +247,7 @@ const AddTransaction = () => {
                                 type="date"
                                 name="date"
                                 defaultValue={new Date().toISOString().split('T')[0]}
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
                                 required
                             />
                         </div>
@@ -258,7 +258,7 @@ const AddTransaction = () => {
                             </div>
                             <textarea
                                 name="description"
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all resize-none"
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all resize-none"
                                 placeholder="Enter description (optional)"
                                 rows="3"
                             />

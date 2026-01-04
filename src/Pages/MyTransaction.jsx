@@ -26,20 +26,32 @@ const MyTransaction = () => {
     const [categories, setCategories] = useState([]);
     const [editForm, setEditForm] = useState({});
     const [paidModal, setPaidModal] = useState({ isOpen: false, transaction: null }); // Paid status modal
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [limit] = useState(15);
 
     const fetchUserTransactions = useCallback(async () => {
         try {
             setDataLoading(true);
-            const data = await getTransactions(user.email, sortBy, sortOrder);
-            setTransactions(data);
-            setFilteredTransactions(data);
+            const data = await getTransactions(user.email, sortBy, sortOrder, page, limit, filter, searchTerm, selectedDate);
+
+            // Handle both array (legacy) and object (paginated) responses
+            if (Array.isArray(data)) {
+                setTransactions(data);
+                setFilteredTransactions(data);
+                setTotalPages(1); // Default if no pagination info
+            } else if (data.transactions) {
+                setTransactions(data.transactions);
+                setFilteredTransactions(data.transactions);
+                setTotalPages(data.totalPages || 1);
+            }
         } catch (error) {
             console.error('Error fetching transactions:', error);
             toast.error('Failed to load transactions');
         } finally {
             setDataLoading(false);
         }
-    }, [user, sortBy, sortOrder]);
+    }, [user, sortBy, sortOrder, page, limit, filter, searchTerm, selectedDate]);
 
     const fetchCategories = useCallback(async () => {
         try {
@@ -121,39 +133,22 @@ const MyTransaction = () => {
         }
     };
 
+    // Sync filteredTransactions with transactions (server-side filtering handles the rest)
     useEffect(() => {
-        let filtered = transactions;
+        setFilteredTransactions(transactions);
+    }, [transactions]);
 
-        if (filter !== 'all') {
-            filtered = filtered.filter(t => t.type === filter);
-        }
+    // Reset to page 1 when sort, filter, search, or date changes
+    useEffect(() => {
+        setPage(1);
+    }, [filter, searchTerm, selectedDate]);
 
-        if (searchTerm) {
-            filtered = filtered.filter(t =>
-                t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                t.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (t.personName && t.personName.toLowerCase().includes(searchTerm.toLowerCase()))
-            );
-        }
-
-        // Date filter
-        if (selectedDate) {
-            filtered = filtered.filter(t => {
-                const transactionDate = new Date(t.date).toISOString().split('T')[0];
-                return transactionDate === selectedDate;
-            });
-        }
-
-        // Backend sorting is already applied, no need to sort again
-        setFilteredTransactions(filtered);
-    }, [transactions, filter, searchTerm, selectedDate]);
-
-    // Refetch data when sort changes
+    // Trigger fetch when dependencies change
     useEffect(() => {
         if (user) {
             fetchUserTransactions();
         }
-    }, [sortBy, sortOrder, fetchUserTransactions, user]);
+    }, [fetchUserTransactions, user]);
 
     const handleDeleteTransaction = async (id) => {
         const result = await Swal.fire({
@@ -295,6 +290,14 @@ const MyTransaction = () => {
         }
     };
 
+    const extraStats = React.useMemo(() => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const todayTxns = transactions.filter(t => new Date(t.date).toISOString().split('T')[0] === todayStr);
+        const todayIncome = todayTxns.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const todayExpense = todayTxns.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        return { todayIncome, todayExpense, todayBalance: todayIncome - todayExpense, todayCount: todayTxns.length };
+    }, [transactions]);
+
     const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
 
@@ -305,20 +308,64 @@ const MyTransaction = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 p-4">
+        <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 md:p-4">
             <div className="max-w-[1220px] mx-auto">
-                {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-base-content mb-2">My Transactions</h1>
-                        <p className="text-base-content/70">Manage your financial transactions</p>
+                        <h1 className="text-3xl font-bold text-base-content mb-1">My Transactions</h1>
+                        <p className="text-base-content/70 text-sm">Manage your financial activity</p>
                     </div>
                     <Link
                         to="/add-transaction"
-                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                        className="flex items-center gap-2 bg-[#F97316] hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-orange-500/20 transition-all active:scale-95"
                     >
-                        + Add Transaction
+                        <span>+</span> Add Transaction
                     </Link>
+                </div>
+
+                {/* Daily Pulse Cards (New View) */}
+                {/* Daily Pulse Cards (Gradient View) */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    {/* Today's Income */}
+                    <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 p-4 rounded-2xl shadow-lg border border-emerald-400/20 group">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-6 -mt-6 transition-transform group-hover:scale-150"></div>
+                        <p className="relative z-10 text-[10px] md:text-xs font-bold text-emerald-100 uppercase tracking-wider mb-1">Today's Income</p>
+                        <h3 className="relative z-10 text-xl md:text-2xl font-black text-white">
+                            BDT {extraStats.todayIncome.toLocaleString()}
+                        </h3>
+                    </div>
+
+                    {/* Today's Expenses */}
+                    <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 to-red-600 p-4 rounded-2xl shadow-lg border border-orange-400/20 group">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-6 -mt-6 transition-transform group-hover:scale-150"></div>
+                        <p className="relative z-10 text-[10px] md:text-xs font-bold text-orange-100 uppercase tracking-wider mb-1">Today's Expense</p>
+                        <h3 className="relative z-10 text-xl md:text-2xl font-black text-white">
+                            BDT {extraStats.todayExpense.toLocaleString()}
+                        </h3>
+                    </div>
+
+                    {/* Today's Net */}
+                    <div className={`relative overflow-hidden p-4 rounded-2xl shadow-lg border group ${extraStats.todayBalance >= 0
+                        ? 'bg-gradient-to-br from-indigo-500 to-blue-600 border-indigo-400/20'
+                        : 'bg-gradient-to-br from-pink-500 to-rose-600 border-pink-400/20'}`}>
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-6 -mt-6 transition-transform group-hover:scale-150"></div>
+                        <p className={`relative z-10 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-1 ${extraStats.todayBalance >= 0 ? 'text-indigo-100' : 'text-pink-100'}`}>Today's Net</p>
+                        <h3 className="relative z-10 text-xl md:text-2xl font-black text-white">
+                            {extraStats.todayBalance > 0 ? '+' : ''}BDT {extraStats.todayBalance.toLocaleString()}
+                        </h3>
+                    </div>
+
+                    {/* Today's Count */}
+                    <div className="relative overflow-hidden bg-gradient-to-br from-slate-700 to-gray-800 p-4 rounded-2xl shadow-lg border border-gray-600/20 group">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -mr-6 -mt-6 transition-transform group-hover:scale-150"></div>
+                        <p className="relative z-10 text-[10px] md:text-xs font-bold text-gray-300 uppercase tracking-wider mb-1">Transactions</p>
+                        <div className="relative z-10 flex items-baseline gap-1">
+                            <h3 className="text-xl md:text-2xl font-black text-white">
+                                {extraStats.todayCount}
+                            </h3>
+                            <span className="text-xs text-gray-400 font-medium">today</span>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Filters and Search */}
@@ -440,7 +487,7 @@ const MyTransaction = () => {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
+                                <table className="table table-zebra w-full text-left border-collapse table-pin-rows">
                                     <thead>
                                         <tr className="bg-gray-50 dark:bg-base-300 text-base-content/70 text-sm uppercase tracking-wider">
                                             <th className="p-4 font-semibold">Date</th>
@@ -535,6 +582,29 @@ const MyTransaction = () => {
                                 </table>
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* Pagination Controls */}
+                {!dataLoading && (
+                    <div className="flex justify-center mt-8 gap-2">
+                        <button
+                            onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                            disabled={page === 1}
+                            className="px-4 py-2 bg-white dark:bg-base-200 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-base-content"
+                        >
+                            Previous
+                        </button>
+                        <span className="px-4 py-2 bg-orange-500 text-white rounded-lg flex items-center shadow-lg shadow-orange-500/30">
+                            Page {page} of {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                            disabled={page === totalPages}
+                            className="px-4 py-2 bg-white dark:bg-base-200 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-base-content"
+                        >
+                            Next
+                        </button>
                     </div>
                 )}
 

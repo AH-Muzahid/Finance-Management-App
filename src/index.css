@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 @plugin "daisyui";
 
 @theme {
@@ -36,6 +37,15 @@
   --color-accent-900: #064e3b;
 
   --font-inter: 'Inter', system-ui, sans-serif;
+
+  /* Custom Pastel Palette */
+  --color-pastel-cream: #FFF7ED;
+  --color-pastel-green: #ECFDF5;
+  --color-pastel-purple: #F3E8FF;
+  --color-pastel-blue: #EFF6FF;
+  --color-pastel-gray: #F3F4F6;
+  --color-deep-teal: #115E59;
+  --color-deep-teal-dark: #0F534F;
 }
 
 /* Base Styles */
@@ -107,11 +117,11 @@ p {
   background: #9ca3af;
 }
 
-html.dark ::-webkit-scrollbar-thumb {
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
   background: #4b5563;
 }
 
-html.dark ::-webkit-scrollbar-thumb:hover {
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: #6b7280;
 }
 
@@ -145,4 +155,29 @@ select {
 /* Smooth Scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Chart Theme Variables */
+:root {
+  /* Light Mode: Primary Orange Card */
+  --chart-card-bg: #ea580c;
+  --chart-card-text: #ffffff;
+  --chart-bar-color: #804848;
+  --chart-axis-color: #ae5353;
+  --chart-subtext: rgba(255, 255, 255, 0.8);
+  --chart-decor: rgba(255, 255, 255, 0.1);
+}
+
+html[data-theme="dark"] {
+  /* Dark Mode: Dark Surface with Orange Accents */
+  --chart-card-bg: #1f2937;
+  /* gray-800 */
+  --chart-card-text: #ffffff;
+  --chart-bar-color: #f97316;
+  /* primary-500 */
+  --chart-axis-color: #9ca3af;
+  /* gray-400 */
+  --chart-subtext: #9ca3af;
+  --chart-decor: rgba(249, 115, 22, 0.1);
+  /* primary-500 with opacity */
 }

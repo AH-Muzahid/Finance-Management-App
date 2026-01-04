@@ -11,11 +11,11 @@ export const saveTransaction = async (transactionData) => {
             },
             body: JSON.stringify(transactionData)
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to save transaction');
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error('Error saving transaction:', error);
@@ -23,21 +23,33 @@ export const saveTransaction = async (transactionData) => {
     }
 };
 
-export const getTransactions = async (email, sortBy = 'date', sortOrder = 'desc', timeout = 10000) => {
+export const getTransactions = async (email, sortBy = 'date', sortOrder = 'desc', page = 1, limit = 10, type = 'all', search = '', date = '', timeout = 10000) => {
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeout);
-        
-        const response = await fetch(`${API_BASE_URL}/my-transactions?email=${email}&sortBy=${sortBy}&sortOrder=${sortOrder}`, {
+
+        const params = new URLSearchParams({
+            email,
+            sortBy,
+            sortOrder,
+            page: page.toString(),
+            limit: limit.toString(),
+        });
+
+        if (type && type !== 'all') params.append('type', type);
+        if (search) params.append('search', search);
+        if (date) params.append('date', date);
+
+        const response = await fetch(`${API_BASE_URL}/my-transactions?${params.toString()}`, {
             signal: controller.signal
         });
-        
+
         clearTimeout(timeoutId);
-        
+
         if (!response.ok) {
             throw new Error('Failed to fetch transactions');
         }
-        
+
         return await response.json();
     } catch (error) {
         if (error.name === 'AbortError') {
@@ -52,11 +64,11 @@ export const getTransactions = async (email, sortBy = 'date', sortOrder = 'desc'
 export const getTransaction = async (id) => {
     try {
         const response = await fetch(`${API_BASE_URL}/transaction/${id}`);
-        
+
         if (!response.ok) {
             throw new Error('Failed to fetch transaction');
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error('Error fetching transaction:', error);
@@ -73,11 +85,11 @@ export const updateTransaction = async (id, transactionData) => {
             },
             body: JSON.stringify(transactionData)
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to update transaction');
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error('Error updating transaction:', error);
@@ -90,11 +102,11 @@ export const deleteTransaction = async (transactionId) => {
         const response = await fetch(`${API_BASE_URL}/transaction/${transactionId}`, {
             method: 'DELETE'
         });
-        
+
         if (!response.ok) {
             throw new Error('Failed to delete transaction');
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error('Error deleting transaction:', error);
@@ -105,11 +117,11 @@ export const deleteTransaction = async (transactionId) => {
 export const getCategories = async () => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/categories`);
-        
+
         if (!response.ok) {
             throw new Error('Failed to fetch categories');
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error('Error fetching categories:', error);

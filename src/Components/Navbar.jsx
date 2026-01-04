@@ -12,26 +12,9 @@ const Navbar = () => {
     const [user] = useUser();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [, setThemeChangeCounter] = useState(0);
     const navigate = useNavigate();
     const location = useLocation();
     const dropdownRef = useRef(null);
-
-    // Detect theme changes
-    useEffect(() => {
-        const updateTheme = () => {
-            setThemeChangeCounter(prev => prev + 1);
-        };
-
-        // Listen for theme changes
-        const observer = new MutationObserver(updateTheme);
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['class'],
-        });
-
-        return () => observer.disconnect();
-    }, []);
 
     const handleLogout = async () => {
         setIsDropdownOpen(false);
@@ -48,7 +31,7 @@ const Navbar = () => {
         { name: 'Contact', path: '/contact', public: true },
         { name: 'Privacy', path: '/privacy', public: true },
         { name: 'Terms', path: '/terms', public: true },
-        { name: 'Dashboard', path: '/dashboard/add-transaction', public: false }
+        { name: 'Dashboard', path: '/dashboard', public: false }
     ];
 
     return (

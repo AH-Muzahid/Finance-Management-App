@@ -1,47 +1,36 @@
 import React, { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 import { FaSun, FaMoon } from 'react-icons/fa';
 
 const SimpleThemeToggle = () => {
-  const [isDark, setIsDark] = useState(false);
+  const { setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const theme = localStorage.getItem('theme');
-    if (theme === 'light') {
-      setIsDark(false);
-      document.documentElement.setAttribute('data-theme', 'light');
-      document.documentElement.classList.remove('dark');
-    } else {
-      setIsDark(true);
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.classList.add('dark');
-      if (!theme) {
-        localStorage.setItem('theme', 'dark');
-      }
-    }
+    setMounted(true);
   }, []);
 
-  const toggleTheme = () => {
-    if (isDark) {
-      setIsDark(false);
-      document.documentElement.setAttribute('data-theme', 'light');
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      setIsDark(true);
-      document.documentElement.setAttribute('data-theme', 'dark');
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
+  if (!mounted) return null;
+
+  const handleToggle = (e) => {
+    setTheme(e.target.checked ? 'dark' : 'light');
   };
 
   return (
-    <button
-      onClick={toggleTheme}
-      className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-      aria-label="Toggle theme"
-    >
-      {isDark ? <FaSun className="text-orange-500" /> : <FaMoon className="text-orange-500" />}
-    </button>
+    <label className="swap swap-rotate btn btn-ghost btn-circle hover:bg-gray-200 dark:hover:bg-gray-700">
+      {/* this hidden checkbox controls the state */}
+      <input
+        type="checkbox"
+        checked={resolvedTheme === 'dark'}
+        onChange={handleToggle}
+      />
+
+      {/* sun icon */}
+      <FaSun className="swap-off fill-current w-5 h-5" />
+
+      {/* moon icon */}
+      <FaMoon className="swap-on fill-current w-5 h-5" />
+    </label>
   );
 };
 

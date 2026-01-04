@@ -3,14 +3,20 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../Firebase/firebase.init';
 import { getTransactions } from '../api/transactions';
 import PageSkeleton from '../Components/PageSkeleton';
-import { FaWallet, FaArrowUp, FaArrowDown, FaChartLine, FaHistory } from 'react-icons/fa';
+import {
+    FaWallet, FaArrowDown, FaArrowUp, FaChartLine, FaArrowRight,
+    FaShoppingBag, FaExclamationCircle, FaCheckCircle, FaLightbulb, FaCalendarDay
+} from 'react-icons/fa';
 import { Link } from 'react-router';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid, Cell, PieChart, Pie, AreaChart, Area } from 'recharts';
+import { useTheme } from 'next-themes';
 
 const DashboardHome = () => {
     const [user, authLoading] = useAuthState(auth);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedMonth, setSelectedMonth] = useState('all');
+    const { resolvedTheme } = useTheme();
 
     const fetchUserTransactions = async () => {
         try {
@@ -35,170 +41,444 @@ const DashboardHome = () => {
         }
     }, [authLoading, user]);
 
-    // Calculate Summary Stats
-    const { totalIncome, totalExpenses, balance, monthlyData } = useMemo(() => {
-        const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-        const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+    // --- DATA LOGIC ---
 
-        // Prepare monthly data for chart (last 6 months)
-        const monthlyStats = {};
-        transactions.forEach(t => {
-            const date = new Date(t.date);
-            const monthKey = date.toLocaleDateString('en-US', { month: 'short' });
-            if (!monthlyStats[monthKey]) {
-                monthlyStats[monthKey] = { name: monthKey, income: 0, expense: 0 };
-            }
-            if (t.type === 'income') monthlyStats[monthKey].income += t.amount;
-            else if (t.type === 'expense') monthlyStats[monthKey].expense += t.amount;
-        });
+    const currentStats = useMemo(() => {
+        let relevantTxns = transactions;
+        if (selectedMonth !== 'all') {
+            relevantTxns = transactions.filter(t => new Date(t.date).getMonth() === parseInt(selectedMonth));
+        }
 
-        // Sort and take last 6
-        const chartData = Object.values(monthlyStats).slice(0, 6).reverse(); // Rough sort, ideally sort by date
+        const income = relevantTxns.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const expenses = relevantTxns.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        const balance = income - expenses;
+        const savingsRate = income > 0 ? ((income - expenses) / income * 100) : 0;
+
+        // Calculate daily average (approximate)
+        const daysInPeriod = selectedMonth === 'all' ? 30 : new Date(new Date().getFullYear(), parseInt(selectedMonth) + 1, 0).getDate();
+        const dailyAverage = expenses / (selectedMonth === 'all' ? 30 : Math.min(daysInPeriod, new Date().getDate()));
 
         return {
-            totalIncome: income,
-            totalExpenses: expenses,
-            balance: income - expenses,
-            monthlyData: chartData
+            transactions: relevantTxns,
+            income,
+            expenses,
+            balance,
+            savingsRate,
+            dailyAverage
         };
-    }, [transactions]);
+    }, [selectedMonth, transactions]);
 
-    const recentTransactions = transactions.slice(0, 5);
+
+
+    const expensesByCategory = useMemo(() => {
+        return currentStats.transactions
+            .filter(t => t.type === 'expense')
+            .reduce((acc, t) => {
+                acc[t.category] = (acc[t.category] || 0) + t.amount;
+                return acc;
+            }, {});
+    }, [currentStats]);
+
+    const pieData = useMemo(() => {
+        return Object.entries(expensesByCategory)
+            .map(([category, amount]) => ({ name: category, value: amount }))
+            .sort((a, b) => b.value - a.value);
+    }, [expensesByCategory]);
+
+    const monthlyData = useMemo(() => {
+        const stats = {};
+        currentStats.transactions.forEach(t => {
+            let key;
+            if (selectedMonth === 'all') {
+                key = new Date(t.date).toLocaleDateString('en-US', { month: 'short' });
+            } else {
+                key = new Date(t.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+            }
+            if (!stats[key]) stats[key] = { name: key, income: 0, expenses: 0 };
+            if (t.type === 'income') stats[key].income += t.amount;
+            else if (t.type === 'expense') stats[key].expenses += t.amount;
+        });
+        return Object.values(stats);
+    }, [currentStats, selectedMonth]);
+
+    const weeklyData = useMemo(() => {
+        const weeklyStats = {};
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        days.forEach(day => { weeklyStats[day] = { day, amount: 0 }; });
+        currentStats.transactions.filter(t => t.type === 'expense').forEach(t => {
+            const dayName = days[new Date(t.date).getDay()];
+            weeklyStats[dayName].amount += t.amount;
+        });
+        return Object.values(weeklyStats);
+    }, [currentStats]);
+
+    // --- INSIGHTS ---
+    const insights = useMemo(() => {
+        const result = [];
+        const { savingsRate, income, expenses } = currentStats;
+
+        // Savings Health
+        if (savingsRate > 30) result.push({ type: 'success', icon: FaCheckCircle, title: 'Excellent Savings', text: 'You are saving more than 30% of your income!' });
+        else if (savingsRate > 10) result.push({ type: 'info', icon: FaLightbulb, title: 'Good Start', text: 'Try to bump your savings to 20% for better stability.' });
+
+        // Budget Alert
+        if (expenses > income * 0.9) result.push({ type: 'warning', icon: FaExclamationCircle, title: 'High Spending', text: 'You have spent over 90% of your income this period.' });
+        if (expenses > income) result.push({ type: 'error', icon: FaExclamationCircle, title: 'Over Budget', text: 'Expenses have exceeded your income.' });
+
+        // Category Spike
+        if (pieData.length > 0) {
+            const topCat = pieData[0];
+            const percent = ((topCat.value / expenses) * 100).toFixed(0);
+            result.push({ type: 'neutral', icon: FaShoppingBag, title: 'Top Category', text: `${topCat.name} accounts for ${percent}% of your spending.` });
+        }
+
+        return result.slice(0, 3); // Show top 3 insights
+    }, [currentStats, pieData]);
+
+
+    const months = [
+        { value: 'all', label: 'All Time' },
+        { value: '0', label: 'January' }, { value: '1', label: 'February' }, { value: '2', label: 'March' },
+        { value: '3', label: 'April' }, { value: '4', label: 'May' }, { value: '5', label: 'June' },
+        { value: '6', label: 'July' }, { value: '7', label: 'August' }, { value: '8', label: 'September' },
+        { value: '9', label: 'October' }, { value: '10', label: 'November' }, { value: '11', label: 'December' }
+    ];
+
+    // Theme-aligned Colors: Primary (Orange), Secondary (Indigo), Accent (Emerald)
+    // We generate shades from these 3 core colors for the charts.
+    const CHART_COLORS = [
+        '#F97316', // Primary 500
+        '#6366F1', // Secondary 500
+        '#10B981', // Accent 500
+        '#FB923C', // Primary 400
+        '#818CF8', // Secondary 400
+        '#34D399', // Accent 400
+        '#EA580C', // Primary 600
+        '#4F46E5', // Secondary 600
+        '#059669'  // Accent 600
+    ];
+
+    const recentTransactions = currentStats.transactions.slice(0, 5);
 
     if (loading || authLoading) return <PageSkeleton />;
 
-    return (
-        <div className="p-6 max-w-7xl mx-auto space-y-8">
-            {/* Welcome Section */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
+    // --- COMPONENTS ---
+
+    const GradientCard = ({ title, amount, subtext, icon: Icon, gradient, textColor = "text-white" }) => (
+        <div className={`relative overflow-hidden rounded-xl md:rounded-2xl p-3 md:p-4 shadow-lg transition-transform hover:scale-[1.02] duration-300 group`}>
+            <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-100 dark:opacity-90`}></div>
+            {/* Decorative Circle */}
+            <div className="absolute -right-6 -top-6 w-20 h-20 md:w-24 md:h-24 bg-white opacity-10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+
+            <div className={`relative z-10 ${textColor}`}>
+                <div className="flex justify-between items-start mb-2">
+                    <div className="p-2 bg-white/20 backdrop-blur-md rounded-lg shadow-inner">
+                        <Icon className="text-lg md:text-xl" />
+                    </div>
+                    <div className="flex flex-col items-end">
+                        <p className="opacity-90 text-[10px] md:text-xs font-semibold uppercase tracking-wider">{title}</p>
+                    </div>
+                </div>
                 <div>
-                    <h1 className="text-3xl font-bold text-base-content">
-                        Welcome back, <span className="text-primary-500">{user?.displayName?.split(' ')[0] || 'User'}</span>! 👋
-                    </h1>
-                    <p className="text-base-content/70 mt-1">Here's what's happening with your finances today.</p>
-                </div>
-                <Link
-                    to="/dashboard/add-transaction"
-                    className="mt-4 md:mt-0 px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold shadow-lg shadow-primary-500/30 transition-all"
-                >
-                    Add Transaction
-                </Link>
-            </div>
-
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Total Balance */}
-                <div className="bg-white dark:bg-base-200 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-base-300">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-xl">
-                            <FaWallet className="text-2xl text-primary-500" />
-                        </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${balance >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                            Total Balance
-                        </span>
-                    </div>
-                    <h2 className="text-3xl font-bold text-base-content mb-1">BDT {balance.toLocaleString()}</h2>
-                    <p className="text-sm text-base-content/60">Available funds</p>
-                </div>
-
-                {/* Income */}
-                <div className="bg-white dark:bg-base-200 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-base-300">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
-                            <FaArrowUp className="text-2xl text-green-500" />
-                        </div>
-                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                            Income
-                        </span>
-                    </div>
-                    <h2 className="text-3xl font-bold text-base-content mb-1">BDT {totalIncome.toLocaleString()}</h2>
-                    <p className="text-sm text-base-content/60">Total earnings</p>
-                </div>
-
-                {/* Expenses */}
-                <div className="bg-white dark:bg-base-200 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-base-300">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl">
-                            <FaArrowDown className="text-2xl text-red-500" />
-                        </div>
-                        <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
-                            Expense
-                        </span>
-                    </div>
-                    <h2 className="text-3xl font-bold text-base-content mb-1">BDT {totalExpenses.toLocaleString()}</h2>
-                    <p className="text-sm text-base-content/60">Total spending</p>
+                    <h3 className="text-xl md:text-2xl font-black tracking-tight mb-0.5">
+                        {amount}
+                    </h3>
+                    <p className="text-[10px] md:text-xs opacity-80 font-medium flex items-center gap-1">
+                        {subtext}
+                    </p>
                 </div>
             </div>
+        </div>
+    );
 
-            {/* Charts & Recent Transactions Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Stats Chart */}
-                <div className="lg:col-span-2 bg-white dark:bg-base-200 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-base-300">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold text-base-content flex items-center gap-2">
-                            <FaChartLine className="text-primary-500" />
-                            Financial Overview
-                        </h3>
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-white/95 dark:bg-base-300/95 backdrop-blur-sm p-4 border border-gray-100 dark:border-base-200 shadow-xl rounded-2xl">
+                    <p className="font-bold text-gray-900 dark:text-gray-100 text-sm mb-2 pb-2 border-b border-gray-100 dark:border-base-200">{label}</p>
+                    {payload.map((entry, index) => (
+                        <div key={index} className="flex items-center gap-2 mb-1 last:mb-0">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }}></div>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 capitalize min-w-[60px]">{entry.name}:</span>
+                            <span className="font-bold text-gray-900 dark:text-gray-100 text-xs">BDT {entry.value.toLocaleString()}</span>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+        return null;
+    };
+
+    return (
+        <div className="min-h-screen font-sans bg-gray-50/50 dark:bg-base-100 pb-6">
+            <div className="max-w-[1600px] mx-auto p-2 md:p-4 space-y-2 md:space-y-5">
+
+                {/* Header Section */}
+                {/* Controls Bar (moved from Overview Header) */}
+                <div className="flex justify-end items-center gap-2 mb-2">
+                    <div className="relative group w-auto md:w-56">
+                        <select
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(e.target.value)}
+                            className="appearance-none px-3 py-2 md:px-5 md:py-3 bg-white dark:bg-base-200 border border-gray-100 dark:border-base-300 rounded-xl text-gray-700 dark:text-gray-200 text-xs md:text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 cursor-pointer transition-all outline-none shadow-sm hover:shadow-md"
+                        >
+                            {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">▼</div>
                     </div>
-                    <div className="h-[300px] w-full">
-                        {monthlyData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={monthlyData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} dy={10} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280' }} />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#fff', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                                        cursor={{ fill: 'transparent' }}
-                                    />
-                                    <Bar dataKey="income" fill="#10B981" radius={[4, 4, 0, 0]} name="Income" barSize={20} />
-                                    <Bar dataKey="expense" fill="#EF4444" radius={[4, 4, 0, 0]} name="Expense" barSize={20} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="h-full flex items-center justify-center text-base-content/40">
-                                No data available for chart
-                            </div>
-                        )}
-                    </div>
+                    <Link to="/dashboard/add-transaction" className="flex items-center justify-center w-10 h-10 bg-[#F97316] text-white rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-xl hover:bg-orange-600">
+                        <span className="text-xl font-light">+</span>
+                    </Link>
                 </div>
 
-                {/* Recent Activity */}
-                <div className="bg-white dark:bg-base-200 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-base-300">
-                    <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold text-base-content flex items-center gap-2">
-                            <FaHistory className="text-primary-500" />
-                            Recent Activity
-                        </h3>
-                        <Link to="/dashboard/my-transactions" className="text-sm text-primary-500 hover:text-primary-600 font-medium">
-                            View All
-                        </Link>
-                    </div>
-                    <div className="space-y-4">
-                        {recentTransactions.map((txn, idx) => (
-                            <div key={txn._id} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-base-300 rounded-xl transition-colors border border-transparent hover:border-gray-100 dark:hover:border-base-100">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                                        }`}>
-                                        {txn.type === 'income' ? <FaArrowUp /> : <FaArrowDown />}
+                {/* Hero Stats Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4">
+                    {/* Secondary Color: Indigo -> Balance (Stability) */}
+                    <GradientCard
+                        title="Total Balance"
+                        amount={`BDT ${currentStats.balance.toLocaleString()}`}
+                        subtext={`${currentStats.income > 0 ? ((currentStats.balance / currentStats.income) * 100).toFixed(0) : 0}% saved`}
+                        icon={FaWallet}
+                        gradient="from-indigo-600 to-blue-600"
+                    />
+                    {/* Accent Color: Emerald -> Income (Growth) */}
+                    <GradientCard
+                        title="Total Income"
+                        amount={`BDT ${currentStats.income.toLocaleString()}`}
+                        subtext="Earnings this period"
+                        icon={FaArrowDown}
+                        gradient="from-emerald-500 to-teal-500"
+                    />
+                    {/* Primary Color: Orange -> Expenses (Activity/Alert) */}
+                    <GradientCard
+                        title="Total Expenses"
+                        amount={`BDT ${currentStats.expenses.toLocaleString()}`}
+                        subtext={`~BDT ${currentStats.dailyAverage.toFixed(0)} daily avg`}
+                        icon={FaArrowUp}
+                        gradient="from-orange-500 to-red-500"
+                    />
+                    {/* Neutral Color: Dark -> Savings (Vault/Premium) */}
+                    <GradientCard
+                        title="Net Savings"
+                        amount={`${currentStats.savingsRate.toFixed(1)}%`}
+                        subtext={currentStats.savingsRate > 20 ? "Healthy status" : "Needs attention"}
+                        icon={FaChartLine}
+                        gradient="from-[#F97316] to-[#F97316]"
+                    />
+                </div>
+
+                {/* Extra Stats Row (Today's Pulse) */}
+
+
+                {/* Main Content Split */}
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+
+                    {/* Left Column (Charts) - spans 8/12 on XL */}
+                    <div className="xl:col-span-8 flex flex-col gap-2 md:gap-4">
+
+                        {/* Area Chart Card */}
+                        <div className="bg-white dark:bg-base-200 rounded-xl md:rounded-[2rem] p-3 md:p-6 shadow-sm border border-gray-100 dark:border-base-300">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 md:mb-6 gap-2">
+                                <div>
+                                    <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Cash Flow Analytics</h3>
+                                    <p className="text-xs md:text-sm text-gray-500">Income vs Expenses over time</p>
+                                </div>
+                                <div className="flex gap-4 text-xs md:text-sm font-medium">
+                                    <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 md:px-3 md:py-1.5 rounded-full border border-emerald-100 dark:border-emerald-800/30">
+                                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-emerald-500"></span>
+                                        <span className="text-emerald-700 dark:text-emerald-400">Income</span>
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-base-content">{txn.category}</p>
-                                        <p className="text-xs text-base-content/60">{new Date(txn.date).toLocaleDateString()}</p>
+                                    <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 md:px-3 md:py-1.5 rounded-full border border-orange-100 dark:border-orange-800/30">
+                                        <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-orange-500"></span>
+                                        <span className="text-orange-700 dark:text-orange-400">Expense</span>
                                     </div>
                                 </div>
-                                <span className={`font-bold ${txn.type === 'income' ? 'text-green-600' : 'text-red-600'
-                                    }`}>
-                                    {txn.type === 'income' ? '+' : '-'} {txn.amount.toLocaleString()}
-                                </span>
                             </div>
-                        ))}
-                        {recentTransactions.length === 0 && (
-                            <div className="text-center py-8 text-base-content/40">
-                                No recent transactions
+
+                            <div className="h-[250px] md:h-[400px] w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart data={monthlyData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+                                        <defs>
+                                            <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                                            </linearGradient>
+                                            <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="#F97316" stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor="#F97316" stopOpacity={0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={resolvedTheme === 'dark' ? '#374151' : '#F3F4F6'} />
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 500 }} dy={10} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12, fontWeight: 500 }} tickFormatter={(val) => `${val / 1000}k`} />
+                                        <RechartsTooltip content={<CustomTooltip />} />
+                                        <Area type="monotone" dataKey="income" stroke="#10B981" strokeWidth={4} fillOpacity={1} fill="url(#colorIncome)" activeDot={{ r: 8, strokeWidth: 0 }} />
+                                        <Area type="monotone" dataKey="expenses" stroke="#F97316" strokeWidth={4} fillOpacity={1} fill="url(#colorExpense)" activeDot={{ r: 8, strokeWidth: 0 }} />
+                                    </AreaChart>
+                                </ResponsiveContainer>
                             </div>
-                        )}
+                        </div>
+
+                        {/* Split: Weekly Bar & Budget Goals */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
+
+                            {/* Weekly Spending */}
+                            <div className="bg-white dark:bg-base-200 rounded-xl md:rounded-[2rem] p-3 md:p-6 shadow-sm border border-gray-100 dark:border-base-300">
+                                <h3 className="text-base md:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center gap-2">
+                                    <FaCalendarDay className="text-primary-500" /> Weekly Activity
+                                </h3>
+                                <div className="h-[200px] md:h-[250px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={weeklyData} barSize={32}>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={resolvedTheme === 'dark' ? '#374151' : '#F3F4F6'} />
+                                            <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#9CA3AF', fontWeight: 600 }} dy={10} />
+                                            <RechartsTooltip cursor={{ fill: resolvedTheme === 'dark' ? '#374151' : '#F9FAFB', radius: 8 }} content={<CustomTooltip />} />
+                                            <Bar dataKey="amount" radius={[8, 8, 8, 8]}>
+                                                {weeklyData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={entry.amount > currentStats.dailyAverage ? '#F97316' : '#FB923C80'} />
+                                                ))}
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+
+                            {/* Smart Insights & Budget */}
+                            <div className="bg-white dark:bg-base-200 rounded-xl md:rounded-[2rem] p-3 md:p-6 shadow-sm border border-gray-100 dark:border-base-300 flex flex-col">
+                                <h3 className="text-base md:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center gap-2">
+                                    <FaLightbulb className="text-yellow-500" /> AI Insights
+                                </h3>
+                                <div className="flex-1 space-y-2 md:space-y-3">
+                                    {insights.length > 0 ? insights.map((insight, idx) => (
+                                        <div key={idx} className={`p-3 rounded-lg md:rounded-xl border flex gap-2 md:gap-3 ${insight.type === 'success' ? 'bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-800/30' :
+                                            insight.type === 'warning' ? 'bg-orange-50 dark:bg-orange-900/10 border-orange-100 dark:border-orange-800/30' :
+                                                insight.type === 'error' ? 'bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-800/30' :
+                                                    'bg-gray-50 dark:bg-gray-800/50 border-gray-100 dark:border-gray-700'
+                                            }`}>
+                                            <div className={`mt-0.5 md:mt-1 text-base md:text-lg ${insight.type === 'success' ? 'text-green-600' :
+                                                insight.type === 'warning' ? 'text-orange-500' :
+                                                    insight.type === 'error' ? 'text-red-500' :
+                                                        'text-gray-500'
+                                                }`}>
+                                                <insight.icon />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-gray-900 dark:text-white text-xs md:text-sm">{insight.title}</h4>
+                                                <p className="text-[10px] md:text-xs text-gray-600 dark:text-gray-400 mt-0.5 md:mt-1 leading-relaxed">{insight.text}</p>
+                                            </div>
+                                        </div>
+                                    )) : (
+                                        <div className="h-full flex flex-col items-center justify-center text-center p-4 opacity-50">
+                                            <p className="text-sm">No insights available just yet.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
+
+                    {/* Right Column (Sidebar Widgets) - spans 4/12 on XL */}
+                    <div className="xl:col-span-4 space-y-2 md:space-y-4">
+
+                        {/* Spending Distribution */}
+                        <div className="bg-white dark:bg-base-200 rounded-xl md:rounded-[2rem] p-3 md:p-6 shadow-sm border border-gray-100 dark:border-base-300">
+                            <div className="flex justify-between items-center mb-3 md:mb-4">
+                                <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Spending</h3>
+                                <button className="text-[10px] md:text-xs font-bold text-primary-500 bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-full">DETAILS</button>
+                            </div>
+
+                            <div className="relative h-[250px] w-full flex justify-center ">
+                                {pieData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie
+                                                data={pieData}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={60}
+                                                outerRadius={90}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                                cornerRadius={8}
+                                                stroke="none"
+                                            >
+                                                {pieData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <RechartsTooltip content={<CustomTooltip />} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="flex items-center justify-center text-gray-400">No data</div>
+                                )}
+                                {/* Center Stat */}
+                                {pieData.length > 0 && (
+                                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                                        <p className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white">{pieData.length}</p>
+                                        <p className="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-wider">Categories</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Styled List */}
+                            <div className="space-y-1 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                {pieData.slice(0, 6).map((entry, index) => (
+                                    <div key={entry.name} className="flex items-center justify-between px-2 rounded-xl md:rounded-2xl hover:bg-gray-50 dark:hover:bg-base-100 transition-colors group cursor-default">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-lg md:rounded-xl flex items-center justify-center text-white shadow-md group-hover:scale-110 transition-transform" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}>
+                                                <FaShoppingBag className="text-xs md:text-sm" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-gray-900 dark:text-white text-xs md:text-sm capitalize">{entry.name}</p>
+                                                <p className="text-[10px] md:text-xs text-gray-400">
+                                                    {((entry.value / currentStats.expenses) * 100).toFixed(1)}%
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <p className="font-bold text-gray-900 dark:text-white text-xs md:text-sm">
+                                            {entry.value.toLocaleString()}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Recent Transactions Mini-List */}
+                        <div className="bg-white dark:bg-base-200 rounded-xl md:rounded-[2rem] p-3 md:p-6 shadow-sm border border-gray-100 dark:border-base-300">
+                            <div className="flex justify-between items-center mb-3">
+                                <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">Recent Activity</h3>
+                                <Link to="/dashboard/my-transactions" className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 dark:bg-base-300 text-gray-400 hover:text-primary-500 hover:bg-primary-50 transition-colors">
+                                    <FaArrowRight className="text-xs" />
+                                </Link>
+                            </div>
+
+                            <div className="relative border-l-2 border-dashed border-gray-200 dark:border-gray-700 ml-2 py-1">
+                                {recentTransactions.length > 0 ? recentTransactions.map((txn, i) => (
+                                    <div key={txn._id} className="relative pl-6 group">
+                                        {/* Timeline Dot */}
+                                        <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white dark:border-base-200 ${txn.type === 'income' ? 'bg-emerald-500' : 'bg-red-500'
+                                            } group-hover:scale-125 transition-transform shadow-sm`}></div>
+
+                                        <div className="flex justify-between items-start">
+                                            <div className='flex flex-col '>
+                                                <p className="font-bold text-gray-900 dark:text-white text-xs md:text-sm capitalize">{txn.category}</p>
+                                                <p className="text-[10px] md:text-xs text-gray-500">{new Date(txn.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</p>
+                                            </div>
+                                            <span className={`text-xs md:text-sm font-bold ${txn.type === 'income' ? 'text-emerald-500' : 'text-gray-900 dark:text-white'}`}>
+                                                {txn.type === 'income' ? '+' : '-'} {txn.amount.toLocaleString()}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )) : (
+                                    <p className="pl-8 text-sm text-gray-400">No recent transactions.</p>
+                                )}
+                            </div>
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
         </div>

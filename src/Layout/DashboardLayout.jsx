@@ -34,7 +34,7 @@ const DashboardLayout = () => {
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="bg-white dark:bg-black/60 border-b border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between sticky top-0 z-30 backdrop-blur-md">
+                <header className="p-4 flex items-center justify-between sticky top-0 z-30 bg-gray-50/90 dark:bg-base-100/90 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-800">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={toggleSidebar}
@@ -42,12 +42,6 @@ const DashboardLayout = () => {
                         >
                             <FaBars className="text-2xl" />
                         </button>
-                        <div className="flex items-center space-x-2 lg:hidden">
-                            <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center shadow-lg shadow-primary-500/30">
-                                <span className="text-white font-bold">F</span>
-                            </div>
-                            <span className="text-lg font-bold text-base-content">FinEase</span>
-                        </div>
                     </div>
 
                     <div className="flex items-center gap-4 ml-auto">
@@ -100,5 +94,4 @@ const DashboardLayout = () => {
         </div>
     );
 };
-
 export default DashboardLayout;

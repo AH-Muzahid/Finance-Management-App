@@ -121,9 +121,13 @@ const router = createBrowserRouter([
   }
 ])
 
+import { ThemeProvider } from 'next-themes';
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
-    <Toaster position="top-center" />
+    <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
+      <RouterProvider router={router} />
+      <Toaster position="top-center" />
+    </ThemeProvider>
   </StrictMode>
 )
