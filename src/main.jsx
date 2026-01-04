@@ -21,7 +21,7 @@ const ForgetPass = React.lazy(() => import('./Components/ForgetPass'));
 const UpdateProfile = React.lazy(() => import('./Components/UpdateProfile'));
 const AddTransaction = React.lazy(() => import('./Pages/AddTransaction'));
 const MyTransaction = React.lazy(() => import('./Pages/MyTransaction'));
-const Reports = React.lazy(() => import('./Pages/Reports'));
+
 const TransactionDetails = React.lazy(() => import('./Pages/TransactionDetails'));
 const About = React.lazy(() => import('./Pages/About'));
 const Contact = React.lazy(() => import('./Pages/Contact'));
@@ -105,14 +105,7 @@ const router = createBrowserRouter([
         path: "transaction/:id",
         Component: TransactionDetails,
       },
-      {
-        path: "reports",
-        element: (
-          <Suspense fallback={<ReportsSkeleton />}>
-            <Reports />
-          </Suspense>
-        ),
-      },
+
     ]
   },
   {

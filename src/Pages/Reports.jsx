@@ -15,9 +15,10 @@ const Reports = () => {
 
     // Filter transactions by selected month
     const filteredTransactions = useMemo(() => {
+        const safeTransactions = Array.isArray(transactions) ? transactions : [];
         return selectedMonth === 'all'
-            ? transactions
-            : transactions.filter(t => {
+            ? safeTransactions
+            : safeTransactions.filter(t => {
                 const transactionMonth = new Date(t.date).getMonth();
                 return transactionMonth === parseInt(selectedMonth);
             });
@@ -168,7 +169,13 @@ const Reports = () => {
         try {
             setDataLoading(true);
             const data = await getTransactions(user?.email, 'date', 'desc');
-            setTransactions(data);
+            if (Array.isArray(data)) {
+                setTransactions(data);
+            } else if (data && Array.isArray(data.transactions)) {
+                setTransactions(data.transactions);
+            } else {
+                setTransactions([]);
+            }
         } catch (error) {
             console.error('Error fetching transactions:', error);
             setTransactions([]);

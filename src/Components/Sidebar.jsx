@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     const mainMenuItems = [
         { name: 'Home', path: '/dashboard', icon: <FaHome /> },
         { name: 'My Transactions', path: '/dashboard/my-transactions', icon: <FaList /> },
-        { name: 'Analytics', path: '/dashboard/reports', icon: <FaChartBar /> },
+
         { name: 'Add Transaction', path: '/dashboard/add-transaction', icon: <FaPlus /> },
     ];
 

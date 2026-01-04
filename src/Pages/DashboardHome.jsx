@@ -5,7 +5,7 @@ import { getTransactions } from '../api/transactions';
 import PageSkeleton from '../Components/PageSkeleton';
 import {
     FaWallet, FaArrowDown, FaArrowUp, FaChartLine, FaArrowRight,
-    FaShoppingBag, FaExclamationCircle, FaCheckCircle, FaLightbulb, FaCalendarDay
+    FaShoppingBag, FaExclamationCircle, FaCheckCircle, FaLightbulb, FaCalendarDay, FaThumbsUp, FaExclamationTriangle
 } from 'react-icons/fa';
 import { Link } from 'react-router';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid, Cell, PieChart, Pie, AreaChart, Area } from 'recharts';
@@ -21,8 +21,14 @@ const DashboardHome = () => {
     const fetchUserTransactions = async () => {
         try {
             setLoading(true);
-            const data = await getTransactions(user?.email, 'date', 'desc');
-            setTransactions(data);
+            const data = await getTransactions(user?.email, 'date', 'desc', 1, 10000);
+            if (Array.isArray(data)) {
+                setTransactions(data);
+            } else if (data.transactions && Array.isArray(data.transactions)) {
+                setTransactions(data.transactions);
+            } else {
+                setTransactions([]);
+            }
         } catch (error) {
             console.error('Error fetching transactions:', error);
             setTransactions([]);
@@ -44,7 +50,7 @@ const DashboardHome = () => {
     // --- DATA LOGIC ---
 
     const currentStats = useMemo(() => {
-        let relevantTxns = transactions;
+        let relevantTxns = Array.isArray(transactions) ? transactions : [];
         if (selectedMonth !== 'all') {
             relevantTxns = transactions.filter(t => new Date(t.date).getMonth() === parseInt(selectedMonth));
         }
@@ -58,15 +64,51 @@ const DashboardHome = () => {
         const daysInPeriod = selectedMonth === 'all' ? 30 : new Date(new Date().getFullYear(), parseInt(selectedMonth) + 1, 0).getDate();
         const dailyAverage = expenses / (selectedMonth === 'all' ? 30 : Math.min(daysInPeriod, new Date().getDate()));
 
+        // Budget/Forecasting Logic for "Pulse" section
+        const todayDate = new Date().getDate();
+        const daysRemaining = selectedMonth === 'all' ? 0 : Math.max(1, daysInPeriod - todayDate);
+        const safeDailySpend = (income - expenses) > 0 ? (income - expenses) / (selectedMonth === 'all' ? 30 : daysRemaining) : 0;
+        const projectedSavings = (income - expenses); // Simple projection
+
         return {
             transactions: relevantTxns,
             income,
             expenses,
             balance,
             savingsRate,
-            dailyAverage
+            dailyAverage,
+            daysRemaining,
+            safeDailySpend,
+            projectedSavings
         };
     }, [selectedMonth, transactions]);
+
+    // --- HEALTH SCORE & INSIGHTS ---
+
+    // Calculate Receivable and Payable for health score context
+    const additionalStats = useMemo(() => {
+        const receivable = currentStats.transactions.filter(t => t.type === 'receivable').reduce((sum, t) => sum + t.amount, 0);
+        const payable = currentStats.transactions.filter(t => t.type === 'payable').reduce((sum, t) => sum + t.amount, 0);
+        return { receivable, payable };
+    }, [currentStats]);
+
+    // Financial health score (0-100)
+    const healthScore = useMemo(() => {
+        let score = 50;
+        const { savingsRate, expenses, income } = currentStats;
+
+        if (savingsRate > 20) score += 30;
+        else if (savingsRate > 10) score += 20;
+        else if (savingsRate > 0) score += 10;
+        else score -= 20;
+
+        // Deduction for excessive undefined/high expenses relative to income could go here
+        // Bonus for having diversity or staying within budget (simplified proxy)
+
+        return Math.max(0, Math.min(100, score));
+    }, [currentStats]);
+
+
 
 
 
@@ -87,18 +129,51 @@ const DashboardHome = () => {
 
     const monthlyData = useMemo(() => {
         const stats = {};
+
+        // If sorting by month (all), we want to ensure order Jan -> Dec. 
+        // If sorting by day (specific month), order by date naturally follows ingestion if sorted, but map ensures keys.
+
         currentStats.transactions.forEach(t => {
             let key;
+            // Determine grouping key
             if (selectedMonth === 'all') {
-                key = new Date(t.date).toLocaleDateString('en-US', { month: 'short' });
+                // Group by Month (e.g., "Jan", "Feb")
+                const date = new Date(t.date);
+                key = date.toLocaleDateString('en-US', { month: 'short' });
+                // We add a sortable index to help Recharts or sorting logic if needed, 
+                // but usually Recharts renders in array order. We'll handle sorting below.
             } else {
+                // Group by Day (e.g., "Jan 01")
                 key = new Date(t.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
             }
-            if (!stats[key]) stats[key] = { name: key, income: 0, expenses: 0 };
+
+            if (!stats[key]) {
+                stats[key] = {
+                    name: key,
+                    income: 0,
+                    expenses: 0,
+                    // Store a timestamp or month index for sorting
+                    sortValue: selectedMonth === 'all' ? new Date(t.date).getMonth() : new Date(t.date).getTime()
+                };
+            }
+
             if (t.type === 'income') stats[key].income += t.amount;
             else if (t.type === 'expense') stats[key].expenses += t.amount;
         });
-        return Object.values(stats);
+
+        // Convert to array and sort
+        const result = Object.values(stats);
+
+        if (selectedMonth === 'all') {
+            // Sort by Month Index (Jan=0, Feb=1...)
+            const monthOrder = { "Jan": 0, "Feb": 1, "Mar": 2, "Apr": 3, "May": 4, "Jun": 5, "Jul": 6, "Aug": 7, "Sep": 8, "Oct": 9, "Nov": 10, "Dec": 11 };
+            result.sort((a, b) => monthOrder[a.name] - monthOrder[b.name]);
+        } else {
+            // Sort by Date (Day 1 < Day 30)
+            result.sort((a, b) => a.sortValue - b.sortValue);
+        }
+
+        return result;
     }, [currentStats, selectedMonth]);
 
     const weeklyData = useMemo(() => {
@@ -112,6 +187,7 @@ const DashboardHome = () => {
         return Object.values(weeklyStats);
     }, [currentStats]);
 
+    // --- INSIGHTS ---
     // --- INSIGHTS ---
     const insights = useMemo(() => {
         const result = [];
@@ -346,9 +422,25 @@ const DashboardHome = () => {
                             {/* Smart Insights & Budget */}
                             <div className="bg-white dark:bg-base-200 rounded-xl md:rounded-[2rem] p-3 md:p-6 shadow-sm border border-gray-100 dark:border-base-300 flex flex-col">
                                 <h3 className="text-base md:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4 flex items-center gap-2">
-                                    <FaLightbulb className="text-yellow-500" /> AI Insights
+                                    <FaLightbulb className="text-yellow-500" /> Financial Health
                                 </h3>
-                                <div className="flex-1 space-y-2 md:space-y-3">
+
+                                {/* Health Score Bar */}
+                                <div className="mb-4">
+                                    <div className="flex justify-between items-end mb-1">
+                                        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Score</span>
+                                        <span className={`text-xl font-black ${healthScore >= 80 ? 'text-green-500' : healthScore >= 50 ? 'text-yellow-500' : 'text-red-500'}`}>{healthScore}</span>
+                                    </div>
+                                    <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+                                        <div
+                                            className={`h-2 rounded-full transition-all duration-1000 ease-out ${healthScore >= 80 ? 'bg-green-500' : healthScore >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                            style={{ width: `${healthScore}%` }}
+                                        ></div>
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 mt-1 text-right">{healthScore >= 80 ? 'Excellent' : healthScore >= 50 ? 'Good' : 'Needs attention'}</p>
+                                </div>
+
+                                <div className="flex-1 space-y-2 md:space-y-3 overflow-y-auto max-h-[200px] custom-scrollbar pr-1">
                                     {insights.length > 0 ? insights.map((insight, idx) => (
                                         <div key={idx} className={`p-3 rounded-lg md:rounded-xl border flex gap-2 md:gap-3 ${insight.type === 'success' ? 'bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-800/30' :
                                             insight.type === 'warning' ? 'bg-orange-50 dark:bg-orange-900/10 border-orange-100 dark:border-orange-800/30' :
@@ -369,9 +461,52 @@ const DashboardHome = () => {
                                         </div>
                                     )) : (
                                         <div className="h-full flex flex-col items-center justify-center text-center p-4 opacity-50">
-                                            <p className="text-sm">No insights available just yet.</p>
+                                            <p className="text-sm">No significant changes.</p>
                                         </div>
                                     )}
+                                </div>
+                            </div>
+
+                            {/* Monthly Budget Pulse (New Section to fill space) */}
+                            <div className="col-span-1 md:col-span-2 bg-white dark:bg-base-200 rounded-xl md:rounded-[2rem] p-4 md:p-6 shadow-sm border border-gray-100 dark:border-base-300">
+                                <h3 className="text-base md:text-xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                                    <FaWallet className="text-blue-500" /> Monthly Budget Pulse
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div className="p-4 bg-gray-50 dark:bg-base-300 rounded-2xl border border-gray-100 dark:border-base-100 relative overflow-hidden">
+                                        <div className="absolute right-0 top-0 p-3 opacity-5">
+                                            <FaCalendarDay className="text-5xl" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Daily Safe Spend</p>
+                                        <p className="text-xl md:text-2xl font-black text-blue-600 dark:text-blue-400">
+                                            BDT {currentStats.safeDailySpend.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                        </p>
+                                        <p className="text-[10px] md:text-xs text-gray-400 mt-1">
+                                            {selectedMonth === 'all' ? 'Avg. daily limit' : `For the next ${currentStats.daysRemaining} days`}
+                                        </p>
+                                    </div>
+
+                                    <div className="p-4 bg-gray-50 dark:bg-base-300 rounded-2xl border border-gray-100 dark:border-base-100 relative overflow-hidden">
+                                        <div className="absolute right-0 top-0 p-3 opacity-5">
+                                            <FaThumbsUp className="text-5xl" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Projected Savings</p>
+                                        <p className={`text-xl md:text-2xl font-black ${currentStats.projectedSavings >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+                                            BDT {currentStats.projectedSavings.toLocaleString()}
+                                        </p>
+                                        <p className="text-[10px] md:text-xs text-gray-400 mt-1">Based on current flow</p>
+                                    </div>
+
+                                    <div className="p-4 bg-gray-50 dark:bg-base-300 rounded-2xl border border-gray-100 dark:border-base-100 relative overflow-hidden">
+                                        <div className="absolute right-0 top-0 p-3 opacity-5">
+                                            <FaChartLine className="text-5xl" />
+                                        </div>
+                                        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider mb-1">Spend Velocity</p>
+                                        <p className="text-xl md:text-2xl font-black text-orange-500">
+                                            {((currentStats.expenses / Math.max(1, currentStats.income)) * 100).toFixed(0)}%
+                                        </p>
+                                        <p className="text-[10px] md:text-xs text-gray-400 mt-1">Of total income used</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -380,6 +515,26 @@ const DashboardHome = () => {
 
                     {/* Right Column (Sidebar Widgets) - spans 4/12 on XL */}
                     <div className="xl:col-span-4 space-y-2 md:space-y-4">
+
+                        {/* Debt & Claims (Receivable/Payable) */}
+                        <div className="grid grid-cols-2 gap-2 md:gap-4">
+                            <div className="bg-white dark:bg-base-200 rounded-xl md:rounded-[1.5rem] p-4 shadow-sm border border-gray-100 dark:border-base-300 relative overflow-hidden group">
+                                <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <FaExclamationCircle className="text-4xl text-orange-500" />
+                                </div>
+                                <p className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">You Owe</p>
+                                <p className="text-lg md:text-xl font-black text-orange-500">BDT {additionalStats.payable.toLocaleString()}</p>
+                                <p className="text-[10px] text-gray-400 mt-1">Payable</p>
+                            </div>
+                            <div className="bg-white dark:bg-base-200 rounded-xl md:rounded-[1.5rem] p-4 shadow-sm border border-gray-100 dark:border-base-300 relative overflow-hidden group">
+                                <div className="absolute right-0 top-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                                    <FaCheckCircle className="text-4xl text-emerald-500" />
+                                </div>
+                                <p className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Owed to You</p>
+                                <p className="text-lg md:text-xl font-black text-emerald-500">BDT {additionalStats.receivable.toLocaleString()}</p>
+                                <p className="text-[10px] text-gray-400 mt-1">Receivable</p>
+                            </div>
+                        </div>
 
                         {/* Spending Distribution */}
                         <div className="bg-white dark:bg-base-200 rounded-xl md:rounded-[2rem] p-3 md:p-6 shadow-sm border border-gray-100 dark:border-base-300">
@@ -456,7 +611,7 @@ const DashboardHome = () => {
 
                             <div className="relative border-l-2 border-dashed border-gray-200 dark:border-gray-700 ml-2 py-1">
                                 {recentTransactions.length > 0 ? recentTransactions.map((txn, i) => (
-                                    <div key={txn._id} className="relative pl-6 group">
+                                    <div key={txn._id || i} className="relative pl-6 group mb-3 last:mb-0">
                                         {/* Timeline Dot */}
                                         <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white dark:border-base-200 ${txn.type === 'income' ? 'bg-emerald-500' : 'bg-red-500'
                                             } group-hover:scale-125 transition-transform shadow-sm`}></div>
@@ -476,6 +631,8 @@ const DashboardHome = () => {
                                 )}
                             </div>
                         </div>
+
+
 
                     </div>
 

@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import PageSkeleton from '../Components/PageSkeleton';
 import MyTransactionSkeleton from '../Components/MyTransactionSkeleton';
 import { getTransactions, deleteTransaction, updateTransaction, getCategories } from '../api/transactions';
-import { FaEdit, FaTrash, FaEye, FaCalendarAlt, FaTag, FaTimes, FaSave, FaSortAmountDown, FaSortAmountUp, FaCheckCircle } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEye, FaCalendarAlt, FaTag, FaTimes, FaSave, FaSortAmountDown, FaSortAmountUp, FaCheckCircle, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 
 const MyTransaction = () => {
@@ -15,7 +15,7 @@ const MyTransaction = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [transactions, setTransactions] = useState([]);
-    const [filteredTransactions, setFilteredTransactions] = useState([]);
+
     const [dataLoading, setDataLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [sortBy, setSortBy] = useState('date');
@@ -36,13 +36,12 @@ const MyTransaction = () => {
             const data = await getTransactions(user.email, sortBy, sortOrder, page, limit, filter, searchTerm, selectedDate);
 
             // Handle both array (legacy) and object (paginated) responses
+            // Handle both array (legacy) and object (paginated) responses
             if (Array.isArray(data)) {
                 setTransactions(data);
-                setFilteredTransactions(data);
                 setTotalPages(1); // Default if no pagination info
             } else if (data.transactions) {
                 setTransactions(data.transactions);
-                setFilteredTransactions(data.transactions);
                 setTotalPages(data.totalPages || 1);
             }
         } catch (error) {
@@ -70,7 +69,6 @@ const MyTransaction = () => {
         } else if (!authLoading && !user) {
             // Clear transactions when user logs out
             setTransactions([]);
-            setFilteredTransactions([]);
             setDataLoading(false);
         }
     }, [authLoading, user, fetchUserTransactions, fetchCategories]);
@@ -134,9 +132,7 @@ const MyTransaction = () => {
     };
 
     // Sync filteredTransactions with transactions (server-side filtering handles the rest)
-    useEffect(() => {
-        setFilteredTransactions(transactions);
-    }, [transactions]);
+
 
     // Reset to page 1 when sort, filter, search, or date changes
     useEffect(() => {
@@ -291,15 +287,32 @@ const MyTransaction = () => {
     };
 
     const extraStats = React.useMemo(() => {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const todayTxns = transactions.filter(t => new Date(t.date).toISOString().split('T')[0] === todayStr);
+        if (!Array.isArray(transactions)) return { todayIncome: 0, todayExpense: 0, todayBalance: 0, todayCount: 0 };
+
+        // Get today's date in local YYYY-MM-DD format
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
+        const todayTxns = transactions.filter(t => {
+            if (!t.date) return false;
+            // Convert transaction date to YYYY-MM-DD
+            const tDate = new Date(t.date);
+            const tYear = tDate.getFullYear();
+            const tMonth = String(tDate.getMonth() + 1).padStart(2, '0');
+            const tDay = String(tDate.getDate()).padStart(2, '0');
+            return `${tYear}-${tMonth}-${tDay}` === todayStr;
+        });
+
         const todayIncome = todayTxns.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
         const todayExpense = todayTxns.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
         return { todayIncome, todayExpense, todayBalance: todayIncome - todayExpense, todayCount: todayTxns.length };
     }, [transactions]);
 
-    const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
-    const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+
 
     if (dataLoading) {
         return <MyTransactionSkeleton />;
@@ -308,7 +321,7 @@ const MyTransaction = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 md:p-4">
+        <div className="min-h-screen bg-gray-50 dark:bg-base-100 md:p-4">
             <div className="max-w-[1220px] mx-auto">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <div>
@@ -324,7 +337,6 @@ const MyTransaction = () => {
                 </div>
 
                 {/* Daily Pulse Cards (New View) */}
-                {/* Daily Pulse Cards (Gradient View) */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     {/* Today's Income */}
                     <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-600 p-4 rounded-2xl shadow-lg border border-emerald-400/20 group">
@@ -441,170 +453,245 @@ const MyTransaction = () => {
                     </div>
                 </div>
 
-                {/* Transactions Table */}
-                {dataLoading ? (
-                    <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 overflow-hidden animate-pulse">
-                        <div className="p-6 border-b border-gray-100 dark:border-base-300 flex justify-between items-center">
-                            <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <div className="w-full">
-                                <div className="flex bg-gray-50 dark:bg-base-300 p-4">
-                                    {[...Array(6)].map((_, i) => (
-                                        <div key={i} className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
+                <div className='-mx-6 md:mx-0'>
+
+                    {/* Transactions Table */}
+                    {dataLoading ? (
+                        <div className="bg-white dark:bg-base-200 md:rounded-xl shadow-lg border border-gray-100 dark:border-base-300 overflow-hidden animate-pulse">
+                            <div className="md:p-6 border-b border-gray-100 dark:border-base-300 flex justify-between items-center">
+                                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <div className="w-full">
+                                    <div className="flex bg-gray-50 dark:bg-base-300 p-4">
+                                        {[...Array(6)].map((_, i) => (
+                                            <div key={i} className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
+                                        ))}
+                                    </div>
+                                    {[...Array(5)].map((_, i) => (
+                                        <div key={i} className="flex p-4 border-b border-gray-100 dark:border-base-300">
+                                            <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
+                                            <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
+                                            <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
+                                            <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
+                                            <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
+                                            <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
+                                        </div>
                                     ))}
                                 </div>
-                                {[...Array(5)].map((_, i) => (
-                                    <div key={i} className="flex p-4 border-b border-gray-100 dark:border-base-300">
-                                        <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
-                                        <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
-                                        <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
-                                        <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
-                                        <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
-                                        <div className="flex-1 h-4 bg-gray-200 dark:bg-gray-700 rounded mx-2"></div>
-                                    </div>
-                                ))}
                             </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="bg-white dark:bg-base-200 rounded-xl shadow-lg border border-gray-100 dark:border-base-300 overflow-hidden">
-                        <div className="p-6 border-b border-gray-100 dark:border-base-300 flex justify-between items-center">
-                            <h3 className="text-xl font-semibold text-base-content">
-                                Transactions ({filteredTransactions.length})
-                            </h3>
-                        </div>
+                    ) : (
+                        <div className="bg-white dark:bg-base-200 md:rounded-xl shadow-lg border border-gray-100 dark:border-base-300 overflow-hidden">
+                            <div className="p-4 border-b border-gray-100 dark:border-base-300 flex justify-between items-center">
+                                <h3 className="text-xl font-semibold text-base-content">
+                                    Transactions ({transactions.length})
+                                </h3>
+                            </div>
 
-                        {filteredTransactions.length === 0 ? (
-                            <div className="p-12 text-center">
-                                <p className="text-base-content/70 mb-4">No transactions found</p>
-                                <Link
-                                    to="/add-transaction"
-                                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors inline-block"
-                                >
-                                    Add Your First Transaction
-                                </Link>
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="table table-zebra w-full text-left border-collapse table-pin-rows">
-                                    <thead>
-                                        <tr className="bg-gray-50 dark:bg-base-300 text-base-content/70 text-sm uppercase tracking-wider">
-                                            <th className="p-4 font-semibold">Date</th>
-                                            <th className="p-4 font-semibold">Description</th>
-                                            <th className="p-4 font-semibold">Category</th>
-                                            <th className="p-4 font-semibold text-center">Type</th>
-                                            <th className="p-4 font-semibold text-right">Amount</th>
-                                            <th className="p-4 font-semibold text-center">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-100 dark:divide-base-300">
-                                        {filteredTransactions.map((transaction) => (
-                                            <tr key={transaction._id} className="hover:bg-gray-50 dark:hover:bg-base-300/50 transition-colors">
-                                                <td className="p-4 whitespace-nowrap text-base-content">
-                                                    <div className="flex items-center gap-2">
-                                                        <FaCalendarAlt className="text-orange-500" />
-                                                        <span>{new Date(transaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4 text-base-content ">
-                                                    <div className="font-medium max-h-[50px] overflow-y-hidden">{transaction.description}</div>
-                                                    {(transaction.type === 'receivable' || transaction.type === 'payable') && transaction.personName && (
-                                                        <div className="text-xs text-base-content/60 mt-0.5">
-                                                            {transaction.type === 'receivable' ? 'From: ' : 'To: '} {transaction.personName}
-                                                        </div>
-                                                    )}
-                                                </td>
-                                                <td className="p-4 whitespace-nowrap text-base-content">
-                                                    <div className="flex items-center gap-2">
-                                                        <FaTag className="text-orange-500" />
-                                                        <span className="capitalize">{transaction.category}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4 text-center whitespace-nowrap">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${transaction.type === 'income' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
-                                                        transaction.type === 'expense' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
-                                                            transaction.type === 'receivable' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
-                                                                'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
-                                                        }`}>
-                                                        {transaction.type}
-                                                    </span>
-                                                </td>
-                                                <td className={`p-4 text-right font-bold whitespace-nowrap ${transaction.type === 'income' ? 'text-green-600' :
-                                                    transaction.type === 'expense' ? 'text-red-600' :
-                                                        transaction.type === 'receivable' ? 'text-blue-600' :
-                                                            'text-orange-600'
-                                                    }`}>
-                                                    {transaction.type === 'income' || transaction.type === 'receivable' ? '+' : '-'}
-                                                    BDT {transaction.amount.toLocaleString()}
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <Link
-                                                            to={`/transaction/${transaction._id}`}
-                                                            className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                                                            title="View Details"
-                                                        >
-                                                            <FaEye size={18} />
-                                                        </Link>
-                                                        <button
-                                                            onClick={() => handleEditClick(transaction)}
-                                                            className="p-2 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
-                                                            title="Edit"
-                                                        >
-                                                            <FaEdit size={18} />
-                                                        </button>
-                                                        {(transaction.type === 'receivable' || transaction.type === 'payable') ? (
-                                                            <button
-                                                                onClick={() => handleMarkAsPaid(transaction)}
-                                                                className={`p-2 rounded-lg transition-colors ${transaction.isPaid
-                                                                    ? 'text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20'
-                                                                    : 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
-                                                                    }`}
-                                                                title={transaction.isPaid ? "Mark as Unpaid" : "Mark as Paid"}
-                                                            >
-                                                                <FaCheckCircle size={18} />
-                                                            </button>
-                                                        ) : (
-                                                            <button
-                                                                onClick={() => handleDeleteTransaction(transaction._id)}
-                                                                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                                                title="Delete"
-                                                            >
-                                                                <FaTrash size={18} />
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td>
+                            {transactions.length === 0 ? (
+                                <div className="p-12 text-center">
+                                    <p className="text-base-content/70 mb-4">No transactions found</p>
+                                    <Link
+                                        to="/add-transaction"
+                                        className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors inline-block"
+                                    >
+                                        Add Your First Transaction
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="table table-zebra w-full text-left border-collapse table-pin-rows">
+                                        <thead>
+                                            <tr className="bg-gray-50 dark:bg-base-300 text-base-content/70 text-sm uppercase tracking-wider">
+                                                <th className="p-4 font-semibold">Date</th>
+                                                <th className="p-4 font-semibold">Description</th>
+                                                <th className="p-4 font-semibold">Category</th>
+                                                <th className="p-4 font-semibold text-center">Type</th>
+                                                <th className="p-4 font-semibold text-right">Amount</th>
+                                                <th className="p-4 font-semibold text-center">Actions</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100 dark:divide-base-300">
+                                            {transactions.map((transaction) => (
+                                                <tr key={transaction._id} className="hover:bg-gray-50 dark:hover:bg-base-300/50 transition-colors">
+                                                    <td className="p-4 whitespace-nowrap text-base-content">
+                                                        <div className="flex items-center gap-2">
+                                                            <FaCalendarAlt className="text-orange-500" />
+                                                            <span>{new Date(transaction.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-base-content ">
+                                                        <div className="font-medium max-h-[50px] overflow-y-hidden">{transaction.description}</div>
+                                                        {(transaction.type === 'receivable' || transaction.type === 'payable') && transaction.personName && (
+                                                            <div className="text-xs text-base-content/60 mt-0.5">
+                                                                {transaction.type === 'receivable' ? 'From: ' : 'To: '} {transaction.personName}
+                                                            </div>
+                                                        )}
+                                                    </td>
+                                                    <td className="p-4 whitespace-nowrap text-base-content">
+                                                        <div className="flex items-center gap-2">
+                                                            <FaTag className="text-orange-500" />
+                                                            <span className="capitalize">{transaction.category}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-center whitespace-nowrap">
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${transaction.type === 'income' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' :
+                                                            transaction.type === 'expense' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
+                                                                transaction.type === 'receivable' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' :
+                                                                    'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
+                                                            }`}>
+                                                            {transaction.type}
+                                                        </span>
+                                                    </td>
+                                                    <td className={`p-4 text-right font-bold whitespace-nowrap ${transaction.type === 'income' ? 'text-green-600' :
+                                                        transaction.type === 'expense' ? 'text-red-600' :
+                                                            transaction.type === 'receivable' ? 'text-blue-600' :
+                                                                'text-orange-600'
+                                                        }`}>
+                                                        {transaction.type === 'income' || transaction.type === 'receivable' ? '+' : '-'}
+                                                        BDT {transaction.amount.toLocaleString()}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex items-center justify-center gap-2">
+                                                            <Link
+                                                                to={`/transaction/${transaction._id}`}
+                                                                className="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                                title="View Details"
+                                                            >
+                                                                <FaEye size={18} />
+                                                            </Link>
+                                                            <button
+                                                                onClick={() => handleEditClick(transaction)}
+                                                                className="p-2 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                                                                title="Edit"
+                                                            >
+                                                                <FaEdit size={18} />
+                                                            </button>
+                                                            {(transaction.type === 'receivable' || transaction.type === 'payable') ? (
+                                                                <button
+                                                                    onClick={() => handleMarkAsPaid(transaction)}
+                                                                    className={`p-2 rounded-lg transition-colors ${transaction.isPaid
+                                                                        ? 'text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+                                                                        : 'text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
+                                                                        }`}
+                                                                    title={transaction.isPaid ? "Mark as Unpaid" : "Mark as Paid"}
+                                                                >
+                                                                    <FaCheckCircle size={18} />
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleDeleteTransaction(transaction._id)}
+                                                                    className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                                    title="Delete"
+                                                                >
+                                                                    <FaTrash size={18} />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
+                </div>
                 {/* Pagination Controls */}
-                {!dataLoading && (
-                    <div className="flex justify-center mt-8 gap-2">
-                        <button
-                            onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                            disabled={page === 1}
-                            className="px-4 py-2 bg-white dark:bg-base-200 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-base-content"
-                        >
-                            Previous
-                        </button>
-                        <span className="px-4 py-2 bg-orange-500 text-white rounded-lg flex items-center shadow-lg shadow-orange-500/30">
-                            Page {page} of {totalPages}
-                        </span>
-                        <button
-                            onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
-                            disabled={page === totalPages}
-                            className="px-4 py-2 bg-white dark:bg-base-200 border border-gray-300 dark:border-gray-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-base-content"
-                        >
-                            Next
-                        </button>
+                {!dataLoading && totalPages > 1 && (
+                    <div className="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4 border-t border-gray-100 dark:border-base-300 pt-6">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                            Showing page <span className="font-bold text-gray-900 dark:text-white">{page}</span> of <span className="font-bold text-gray-900 dark:text-white">{totalPages}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            {/* Prev Button */}
+                            <button
+                                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                                disabled={page === 1}
+                                className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-base-200 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                title="Previous"
+                            >
+                                <FaChevronLeft size={12} />
+                            </button>
+
+                            {/* Page Numbers */}
+                            <div className="flex items-center gap-1 bg-gray-50 dark:bg-base-200/50 p-1 rounded-lg">
+                                {(() => {
+                                    const pages = [];
+                                    // Always show first page
+                                    pages.push(
+                                        <button
+                                            key={1}
+                                            onClick={() => setPage(1)}
+                                            className={`h-8 min-w-[32px] px-2 flex items-center justify-center rounded-md text-sm font-semibold transition-all ${page === 1
+                                                ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                                                : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-base-300'
+                                                }`}
+                                        >
+                                            1
+                                        </button>
+                                    );
+
+                                    // Show dots if far from start
+                                    if (page > 3) {
+                                        pages.push(<span key="start-dots" className="px-1 text-gray-400 text-xs">...</span>);
+                                    }
+
+                                    // Pages around current
+                                    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) {
+                                        pages.push(
+                                            <button
+                                                key={i}
+                                                onClick={() => setPage(i)}
+                                                className={`h-8 min-w-[32px] px-2 flex items-center justify-center rounded-md text-sm font-semibold transition-all ${page === i
+                                                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-base-300'
+                                                    }`}
+                                            >
+                                                {i}
+                                            </button>
+                                        );
+                                    }
+
+                                    // Show dots if far from end
+                                    if (page < totalPages - 2) {
+                                        pages.push(<span key="end-dots" className="px-1 text-gray-400 text-xs">...</span>);
+                                    }
+
+                                    // Always show last page if > 1
+                                    if (totalPages > 1) {
+                                        pages.push(
+                                            <button
+                                                key={totalPages}
+                                                onClick={() => setPage(totalPages)}
+                                                className={`h-8 min-w-[32px] px-2 flex items-center justify-center rounded-md text-sm font-semibold transition-all ${page === totalPages
+                                                    ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-base-300'
+                                                    }`}
+                                            >
+                                                {totalPages}
+                                            </button>
+                                        );
+                                    }
+
+                                    return pages;
+                                })()}
+                            </div>
+
+                            {/* Next Button */}
+                            <button
+                                onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={page === totalPages}
+                                className="h-9 w-9 flex items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-base-200 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-base-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                title="Next"
+                            >
+                                <FaChevronRight size={12} />
+                            </button>
+                        </div>
                     </div>
                 )}
 
