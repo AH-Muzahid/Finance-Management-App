@@ -20,7 +20,8 @@ const MyTransaction = () => {
     const [filter, setFilter] = useState('all');
     const [sortBy, setSortBy] = useState('date');
     const [sortOrder, setSortOrder] = useState('desc');
-    const [searchTerm, setSearchTerm] = useState('');
+    const queryParams = new URLSearchParams(location.search);
+    const [searchTerm, setSearchTerm] = useState(queryParams.get('search') || '');
     const [selectedDate, setSelectedDate] = useState(''); // Date filter state
     const [editModal, setEditModal] = useState({ isOpen: false, transaction: null });
     const [categories, setCategories] = useState([]);
@@ -29,6 +30,15 @@ const MyTransaction = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [limit] = useState(15);
+
+    // Sync search with URL
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const urlSearch = queryParams.get('search') || '';
+        if (urlSearch !== searchTerm) {
+            setSearchTerm(urlSearch);
+        }
+    }, [location.search]);
 
     const fetchUserTransactions = useCallback(async () => {
         try {

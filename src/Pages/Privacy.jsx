@@ -10,16 +10,17 @@ const Privacy = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-16">
             {/* Hero Section */}
-            <div className="bg-gradient-to-br from-primary-500 via-purple-500 to-secondary-500 py-16">
-                <div className="max-w-[1220px] mx-auto px-6 text-center">
+            <div className="bg-slate-900 py-16 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black opacity-80"></div>
+                <div className="max-w-[1220px] mx-auto px-6 text-center relative z-10">
                     <div className="flex justify-center mb-4">
-                        <FaShieldAlt className="text-6xl text-white" />
+                        <FaShieldAlt className="text-6xl text-orange-500" />
                     </div>
                     <h1 className="text-4xl font-bold text-white mb-4">Privacy Policy</h1>
-                    <p className="text-lg text-primary-100 max-w-2xl mx-auto">
+                    <p className="text-lg text-slate-300 max-w-2xl mx-auto">
                         Your privacy is important to us. Learn how we collect, use, and protect your personal information.
                     </p>
-                    <p className="text-sm text-primary-200 mt-4">Last Updated: January 2, 2026</p>
+                    <p className="text-sm text-slate-400 mt-4">Last Updated: January 2, 2026</p>
                 </div>
             </div>
 

@@ -106,9 +106,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
                 {/* User Profile Snippet (Bottom) */}
                 {user && (
-                    <div className="p-6 border-t border-gray-100 dark:border-gray-800">
+                    <Link to="/dashboard/profile" className="p-6 border-t border-gray-100 dark:border-gray-800 block hover:bg-gray-50 dark:hover:bg-base-300 transition-colors group">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                            <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden ring-2 ring-transparent group-hover:ring-orange-500 transition-all">
                                 {user.photoURL ? (
                                     <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
@@ -116,11 +116,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold truncate text-gray-900 dark:text-white">{user.displayName || 'User'}</p>
+                                <p className="text-sm font-bold truncate text-gray-900 dark:text-white group-hover:text-orange-500 transition-colors">{user.displayName || 'User'}</p>
                                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 )}
             </aside>
         </>

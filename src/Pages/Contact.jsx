@@ -91,10 +91,11 @@ const Contact = () => {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-16">
             {/* Hero Section */}
-            <div className="bg-gradient-to-br from-primary-500 via-purple-500 to-secondary-500 py-20">
-                <div className="max-w-[1220px] mx-auto px-6 text-center">
+            <div className="bg-slate-900 py-20 relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black opacity-80"></div>
+                <div className="max-w-[1220px] mx-auto px-6 text-center relative z-10">
                     <h1 className="text-5xl font-bold text-white mb-6">Get In Touch</h1>
-                    <p className="text-xl text-primary-100 mb-8 max-w-3xl mx-auto">
+                    <p className="text-xl text-slate-300 mb-8 max-w-3xl mx-auto">
                         Have questions about FinEase? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
                     </p>
                 </div>

@@ -72,7 +72,7 @@ const AddTransaction = () => {
             });
 
             if (swalResult.isConfirmed) {
-                navigate('/my-transactions');
+                navigate('/dashboard/my-transactions');
             } else {
                 form.reset();
                 setType('expense');
@@ -294,7 +294,7 @@ const AddTransaction = () => {
                         >
                             <FaPlus /> Add Transaction
                         </button>
-{/* 
+                        {/* 
                         <button
                             type="button"
                             onClick={() => navigate('/my-transactions')}

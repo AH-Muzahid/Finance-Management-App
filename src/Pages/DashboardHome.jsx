@@ -188,7 +188,6 @@ const DashboardHome = () => {
     }, [currentStats]);
 
     // --- INSIGHTS ---
-    // --- INSIGHTS ---
     const insights = useMemo(() => {
         const result = [];
         const { savingsRate, income, expenses } = currentStats;
@@ -208,7 +207,7 @@ const DashboardHome = () => {
             result.push({ type: 'neutral', icon: FaShoppingBag, title: 'Top Category', text: `${topCat.name} accounts for ${percent}% of your spending.` });
         }
 
-        return result.slice(0, 3); // Show top 3 insights
+        return result.slice(0, 3);
     }, [currentStats, pieData]);
 
 
@@ -220,8 +219,6 @@ const DashboardHome = () => {
         { value: '9', label: 'October' }, { value: '10', label: 'November' }, { value: '11', label: 'December' }
     ];
 
-    // Theme-aligned Colors: Primary (Orange), Secondary (Indigo), Accent (Emerald)
-    // We generate shades from these 3 core colors for the charts.
     const CHART_COLORS = [
         '#F97316', // Primary 500
         '#6366F1', // Secondary 500
@@ -287,11 +284,12 @@ const DashboardHome = () => {
 
     return (
         <div className="min-h-screen font-sans bg-gray-50/50 dark:bg-base-100 pb-6">
-            <div className="max-w-[1600px] mx-auto p-2 md:p-4 space-y-2 md:space-y-5">
-
+            <div className="max-w-[1600px] mx-auto p-2 md:p-4 md:space-y-5">
                 {/* Header Section */}
-                {/* Controls Bar (moved from Overview Header) */}
-                <div className="flex justify-end items-center gap-2 mb-2">
+                <div className="flex justify-between items-center gap-4 mb-2">
+                    <div>
+                        <h1 className="text-md font-bold tracking-tight text-gray-900 dark:text-gray-100">Dashboard</h1>
+                    </div>
                     <div className="relative group w-auto md:w-56">
                         <select
                             value={selectedMonth}
@@ -300,11 +298,7 @@ const DashboardHome = () => {
                         >
                             {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                         </select>
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[10px]">▼</div>
                     </div>
-                    <Link to="/dashboard/add-transaction" className="flex items-center justify-center w-10 h-10 bg-[#F97316] text-white rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-xl hover:bg-orange-600">
-                        <span className="text-xl font-light">+</span>
-                    </Link>
                 </div>
 
                 {/* Hero Stats Grid */}
