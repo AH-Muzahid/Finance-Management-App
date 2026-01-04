@@ -11,6 +11,9 @@ const provider = new GoogleAuthProvider();
 const LogIn = () => {
     const [showPassword, setShowPassword] = useState(false);
 
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
@@ -19,18 +22,13 @@ const LogIn = () => {
         document.title = 'Sign In - Finance Management';
     }, []);
 
-
-
     const handleLogin = (event) => {
         event.preventDefault();
-        
-        const form = event.target;
-        const email = form.email.value;
-        const password = form.password.value;
 
         signInWithEmailAndPassword(auth, email, password)
             .then(result => {
-                form.reset();
+                setEmail('');
+                setPassword('');
                 toast.success('Login successful! Welcome back.');
                 navigate(from, { replace: true });
             })
@@ -48,7 +46,6 @@ const LogIn = () => {
     };
 
     const handleGoogleLogin = () => {
-        
         signInWithPopup(auth, provider)
             .then(result => {
                 toast.success('Google login successful! Welcome back.');
@@ -57,6 +54,12 @@ const LogIn = () => {
             .catch(error => {
                 toast.error('Google login failed. Please try again.');
             });
+    };
+
+    const handleDemoLogin = () => {
+        setEmail('demo@finease.com');
+        setPassword('Democratic123');
+        toast.success('Demo credentials filled! Click Sign In.');
     };
 
     return (
@@ -72,34 +75,38 @@ const LogIn = () => {
                         </h1>
                         <p className="text-base-content/70">Sign in to manage your finances</p>
                     </div>
-                    
+
                     <form onSubmit={handleLogin} className="space-y-6">
                         <div>
                             <div className="mb-2">
                                 <span className="font-medium flex items-center gap-2 text-base-content"><FaEnvelope className="text-orange-500" /> Email</span>
                             </div>
-                            <input 
-                                type="email" 
-                                name="email" 
-                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all" 
-                                placeholder="Enter your email" 
-                                required 
+                            <input
+                                type="email"
+                                name="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all"
+                                placeholder="Enter your email"
+                                required
                             />
                         </div>
-                        
+
                         <div>
                             <div className="mb-2">
                                 <span className="font-medium flex items-center gap-2 text-base-content"><FaLock className="text-orange-500" /> Password</span>
                             </div>
                             <div className="relative">
-                                <input 
+                                <input
                                     type={showPassword ? "text" : "password"}
-                                    name="password" 
-                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all pr-12" 
-                                    placeholder="Enter your password" 
-                                    required 
+                                    name="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-black dark:text-white placeholder-black dark:placeholder-gray-400 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 focus:outline-none transition-all pr-12"
+                                    placeholder="Enter your password"
+                                    required
                                 />
-                                <button 
+                                <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
@@ -108,10 +115,9 @@ const LogIn = () => {
                                 </button>
                             </div>
                             <div className="text-right mt-2">
-                                <button 
+                                <button
                                     type="button"
                                     onClick={() => {
-                                        const email = document.querySelector('input[name="email"]').value;
                                         navigate('/forgot-password', { state: { email } });
                                     }}
                                     className="text-orange-500 hover:text-orange-600 text-sm font-medium text-center"
@@ -120,30 +126,36 @@ const LogIn = () => {
                                 </button>
                             </div>
                         </div>
-                        
 
-                        
                         <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
-                            <FaRocket/> Sign In
+                            <FaRocket /> Sign In
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleDemoLogin}
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                        >
+                            <FaLock /> Demo User
                         </button>
                     </form>
-                    
+
                     <div className="flex items-center my-6">
                         <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                         <span className="px-4 text-base-content/60 font-medium text-sm">OR</span>
                         <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
                     </div>
-                    
-                    <button 
+
+                    <button
                         onClick={handleGoogleLogin}
-                        className="w-full bg-orange-400 hover:bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                        className="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-3"
                     >
                         <FaGoogle className="text-red-500" />
                         Continue with Google
                     </button>
-                    
-                    <p className="text-center text-sm text-base-content/70">
-                        New to Finance Management? 
+
+                    <p className="text-center text-sm text-base-content/70 mt-4">
+                        New to Finance Management?
                         <Link to='/register' className='text-orange-500 hover:text-orange-600 font-semibold ml-1 transition-colors'>
                             Create Account
                         </Link>
