@@ -97,11 +97,11 @@ const Profile = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-base-100 pt-20 p-4">
+        <div className="min-h-screen bg-gray-50 dark:bg-base-100">
             <div className="max-w-4xl mx-auto">
                 <div className="max-w-2xl mx-auto">
-                    <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div className="text-center mb-4">
+                        <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-2">
                             <FaUser className="text-white text-xl" />
                         </div>
                         <h1 className="text-3xl font-bold text-base-content mb-2">My Profile</h1>

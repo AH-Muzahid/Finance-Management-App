@@ -62,6 +62,42 @@ const LogIn = () => {
         toast.success('Demo credentials filled! Click Sign In.');
     };
 
+    // Auto-seed data for demo user if empty
+    useEffect(() => {
+        const seedDemoData = async (userEmail) => {
+            if (userEmail === 'demo@finease.com') {
+                try {
+                    // Check if data exists
+                    const existingData = await fetch(`http://localhost:3000/my-transactions?email=${userEmail}&limit=1`).then(res => res.json());
+                    const count = Array.isArray(existingData) ? existingData.length : (existingData.transactions?.length || 0);
+
+                    if (count === 0) {
+                        toast.loading('Seeding demo data...', { id: 'seed' });
+                        const transactions = demoTransactions(userEmail);
+
+                        for (const txn of transactions) {
+                            await fetch(`http://localhost:3000/add-transaction`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(txn)
+                            });
+                        }
+                        toast.success('Demo data seeded!', { id: 'seed' });
+                    }
+                } catch (error) {
+                    console.error("Seeding failed", error);
+                }
+            }
+        };
+
+        const unsubscribe = auth.onAuthStateChanged(user => {
+            if (user) {
+                seedDemoData(user.email);
+            }
+        });
+        return () => unsubscribe();
+    }, []);
+
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50 dark:bg-base-100 pt-20">
             <div className="w-full max-w-md">
